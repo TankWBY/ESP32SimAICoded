@@ -282,89 +282,186 @@ bool Rv32Cpu::csr_access(uint32_t csr, uint32_t* old, uint32_t v, bool do_write)
 }
 
 namespace {
-enum Op : uint16_t {
-    OP_SLOW = 0, OP_ILLEGAL,
-    OP_LUI, OP_AUIPC, OP_JAL, OP_JALR,
+enum Op : uint8_t {
+    OP_SLOW, OP_CILL,  // generic decoder (imm = encoding, rd = length); illegal compressed (imm = raw)
+    OP_LUI,            // also AUIPC, with the result precomputed
+    OP_JAL, OP_JALR,
     OP_BEQ, OP_BNE, OP_BLT, OP_BGE, OP_BLTU, OP_BGEU,
     OP_LB, OP_LH, OP_LW, OP_LBU, OP_LHU, OP_SB, OP_SH, OP_SW,
     OP_ADDI, OP_SLTI, OP_SLTIU, OP_XORI, OP_ORI, OP_ANDI, OP_SLLI, OP_SRLI, OP_SRAI,
     OP_ADD, OP_SUB, OP_SLL, OP_SLT, OP_SLTU, OP_XOR, OP_SRL, OP_SRA, OP_OR, OP_AND,
     OP_MUL, OP_MULH, OP_MULHSU, OP_MULHU, OP_DIV, OP_DIVU, OP_REM, OP_REMU,
     OP_FENCE,
+    OP_END,  // end marker after the last instruction of a block that does not end in a jump
 };
+constexpr uint8_t kSink = 32;  // destination register index for writes to x0
 }  // namespace
 
-void Rv32Cpu::decode(uint32_t insn, uint32_t len, uint32_t raw, Decoded& d) {
-    d.pc = pc;
-    d.raw = raw;
-    d.len = uint8_t(len);
-    d.insn = insn;
-    d.rd = uint8_t(bits(insn, 11, 7));
-    d.rs1 = uint8_t(bits(insn, 19, 15));
-    d.rs2 = uint8_t(bits(insn, 24, 20));
-    d.imm = 0;
-    d.op = OP_SLOW;
+Rv32Cpu::Rv32Cpu(Bus& bus) : bus_(bus) {
+    bus_.on_code_write = [this] {
+        flush_icache();
+        attention_ = true;  // leave the running block: its code may have changed
+    };
+}
+
+void Rv32Cpu::decode(uint32_t insn, uint32_t len, uint32_t at, Op& o, bool& ends_block) {
+    const uint32_t rd = bits(insn, 11, 7);
+    o.rd = uint8_t(rd ? rd : kSink);
+    o.rs1 = uint8_t(bits(insn, 19, 15));
+    o.rs2 = uint8_t(bits(insn, 24, 20));
+    o.imm = 0;
+    o.op = OP_SLOW;
+    ends_block = false;
     const uint32_t f3 = bits(insn, 14, 12), f7 = insn >> 25;
     switch (insn & 0x7F) {
-    case 0x37: d.op = OP_LUI; d.imm = int32_t(insn & 0xFFFFF000u); break;
-    case 0x17: d.op = OP_AUIPC; d.imm = int32_t(insn & 0xFFFFF000u); break;
+    case 0x37: o.op = OP_LUI; o.imm = insn & 0xFFFFF000u; break;
+    case 0x17: o.op = OP_LUI; o.imm = at + (insn & 0xFFFFF000u); break;  // AUIPC
     case 0x6F:
-        d.op = OP_JAL;
-        d.imm = sext((bit(insn, 31) << 20) | (bits(insn, 19, 12) << 12) | (bit(insn, 20) << 11) | (bits(insn, 30, 21) << 1), 21);
+        o.op = OP_JAL;
+        o.imm = at + uint32_t(sext((bit(insn, 31) << 20) | (bits(insn, 19, 12) << 12) | (bit(insn, 20) << 11) |
+                                       (bits(insn, 30, 21) << 1),
+                                   21));
+        ends_block = true;
         break;
-    case 0x67: d.op = OP_JALR; d.imm = sext(insn >> 20, 12); break;
+    case 0x67: o.op = OP_JALR; o.imm = uint32_t(sext(insn >> 20, 12)); ends_block = true; break;
     case 0x63: {
-        static const uint16_t ops[8] = {OP_BEQ, OP_BNE, OP_SLOW, OP_SLOW, OP_BLT, OP_BGE, OP_BLTU, OP_BGEU};
-        d.op = ops[f3];
-        d.imm = sext((bit(insn, 31) << 12) | (bit(insn, 7) << 11) | (bits(insn, 30, 25) << 5) | (bits(insn, 11, 8) << 1), 13);
+        static const uint8_t ops[8] = {OP_BEQ, OP_BNE, OP_SLOW, OP_SLOW, OP_BLT, OP_BGE, OP_BLTU, OP_BGEU};
+        o.op = ops[f3];
+        if (o.op != OP_SLOW)
+            o.imm = at + uint32_t(sext((bit(insn, 31) << 12) | (bit(insn, 7) << 11) | (bits(insn, 30, 25) << 5) |
+                                           (bits(insn, 11, 8) << 1),
+                                       13));
+        // Not-taken branches fall through within the block (a side exit).
         break;
     }
     case 0x03: {
-        static const uint16_t ops[8] = {OP_LB, OP_LH, OP_LW, OP_SLOW, OP_LBU, OP_LHU, OP_SLOW, OP_SLOW};
-        d.op = ops[f3];
-        d.imm = sext(insn >> 20, 12);
+        static const uint8_t ops[8] = {OP_LB, OP_LH, OP_LW, OP_SLOW, OP_LBU, OP_LHU, OP_SLOW, OP_SLOW};
+        o.op = ops[f3];
+        o.imm = uint32_t(sext(insn >> 20, 12));
         break;
     }
     case 0x23: {
-        static const uint16_t ops[8] = {OP_SB, OP_SH, OP_SW, OP_SLOW, OP_SLOW, OP_SLOW, OP_SLOW, OP_SLOW};
-        d.op = ops[f3];
-        d.imm = sext((f7 << 5) | d.rd, 12);
+        static const uint8_t ops[8] = {OP_SB, OP_SH, OP_SW, OP_SLOW, OP_SLOW, OP_SLOW, OP_SLOW, OP_SLOW};
+        o.op = ops[f3];
+        o.imm = uint32_t(sext((f7 << 5) | rd, 12));
         break;
     }
     case 0x13: {
-        static const uint16_t ops[8] = {OP_ADDI, OP_SLLI, OP_SLTI, OP_SLTIU, OP_XORI, OP_SRLI, OP_ORI, OP_ANDI};
-        d.op = ops[f3];
-        d.imm = sext(insn >> 20, 12);
-        if (f3 == 5 && (f7 & 0x20)) d.op = OP_SRAI;
-        if (f3 == 1 || f3 == 5) d.imm = int32_t(d.rs2);
+        static const uint8_t ops[8] = {OP_ADDI, OP_SLLI, OP_SLTI, OP_SLTIU, OP_XORI, OP_SRLI, OP_ORI, OP_ANDI};
+        o.op = ops[f3];
+        o.imm = uint32_t(sext(insn >> 20, 12));
+        if (f3 == 5 && (f7 & 0x20)) o.op = OP_SRAI;
+        if (f3 == 1 || f3 == 5) o.imm = o.rs2;
         break;
     }
     case 0x33:
         if (f7 == 1) {
-            static const uint16_t ops[8] = {OP_MUL, OP_MULH, OP_MULHSU, OP_MULHU, OP_DIV, OP_DIVU, OP_REM, OP_REMU};
-            d.op = ops[f3];
+            static const uint8_t ops[8] = {OP_MUL, OP_MULH, OP_MULHSU, OP_MULHU, OP_DIV, OP_DIVU, OP_REM, OP_REMU};
+            o.op = ops[f3];
         } else if (f7 == 0) {
-            static const uint16_t ops[8] = {OP_ADD, OP_SLL, OP_SLT, OP_SLTU, OP_XOR, OP_SRL, OP_OR, OP_AND};
-            d.op = ops[f3];
+            static const uint8_t ops[8] = {OP_ADD, OP_SLL, OP_SLT, OP_SLTU, OP_XOR, OP_SRL, OP_OR, OP_AND};
+            o.op = ops[f3];
         } else if (f7 == 0x20 && (f3 == 0 || f3 == 5)) {
-            d.op = f3 == 0 ? OP_SUB : OP_SRA;
+            o.op = f3 == 0 ? OP_SUB : OP_SRA;
         }
         break;
-    case 0x0F: d.op = OP_FENCE; break;
+    case 0x0F: o.op = OP_FENCE; break;
     default: break;  // SYSTEM, AMO, illegal: slow path
+    }
+    if (o.op == OP_SLOW) {
+        o.imm = insn;
+        o.rd = uint8_t(len);
+        ends_block = true;  // CSR writes, traps, WFI and AMOs need the full machine state
     }
 }
 
 void Rv32Cpu::flush_icache() {
-    for (uint32_t i = 0; i < (1u << kCacheBits); ++i) icache_[i].pc = 1;
+    for (uint32_t i = 0; i < (1u << kBlockBits); ++i) blocks_[i].pc = 1;
+    arena_used_ = 0;
+    bus_.clear_code_marks();
 }
+
+const Rv32Cpu::Block* Rv32Cpu::translate(uint32_t start, uint32_t max_ops) {
+    Block* b = &partial_;
+    Op* dst = partial_ops_.get();
+    if (max_ops >= kMaxBlockOps) {
+        if (arena_used_ + kMaxBlockOps + 1 > kArenaOps) flush_icache();
+        b = &blocks_[(start >> 1) & ((1u << kBlockBits) - 1)];
+        dst = arena_.get() + arena_used_;
+        max_ops = kMaxBlockOps;
+    }
+    uint32_t at = start, count = 0;
+    for (;;) {
+        Op& o = dst[count];
+        uint32_t raw = bus_.read<2>(at);
+        const bool is32 = (raw & 3) == 3;
+        if (is32) raw |= bus_.read<2>(at + 2) << 16;
+        uint32_t insn = raw;
+        bool ends = true;
+        if (!is32 && !expand_compressed(uint16_t(raw), &insn)) {
+            o.op = OP_CILL;
+            o.rd = o.rs1 = o.rs2 = 0;
+            o.imm = raw;
+        } else {
+            decode(insn, is32 ? 4 : 2, at, o, ends);
+        }
+        o.pc = at;
+        ++count;
+        at += is32 ? 4 : 2;
+        if (ends || count == max_ops || at - hook_lo < hook_hi - hook_lo) break;
+    }
+    dst[count] = Op{OP_END, 0, 0, 0, 0, at};
+    b->pc = start;
+    b->count = count;
+    b->ops = dst;
+    if (b != &partial_) arena_used_ += count + 1;
+    bus_.mark_code(start, at - start);
+    return b;
+}
+
+// GCC and Clang dispatch through a table of label addresses ("threaded code"),
+// which gives every handler its own indirect jump and so far better branch
+// prediction than one shared switch. Other compilers use the switch.
+#if defined(__GNUC__) && !defined(RV_NO_THREADED)
+#define RV_THREADED 1
+#endif
 
 uint64_t Rv32Cpu::run(uint64_t max_instructions) {
     stop_ = false;
     attention_ = true;
     uint64_t n = 0;
-    const uint32_t mask = (1u << kCacheBits) - 1;
-    Decoded* cache = icache_.get();
+    uint32_t* const r = x;
+    const uint32_t mask = (1u << kBlockBits) - 1;
+    const bool hooked = hook && hook_hi > hook_lo;
+#ifdef RV_THREADED
+    static const void* const kHandlers[] = {
+        &&L_OP_SLOW, &&L_OP_CILL, &&L_OP_LUI, &&L_OP_JAL, &&L_OP_JALR,
+        &&L_OP_BEQ, &&L_OP_BNE, &&L_OP_BLT, &&L_OP_BGE, &&L_OP_BLTU, &&L_OP_BGEU,
+        &&L_OP_LB, &&L_OP_LH, &&L_OP_LW, &&L_OP_LBU, &&L_OP_LHU, &&L_OP_SB, &&L_OP_SH, &&L_OP_SW,
+        &&L_OP_ADDI, &&L_OP_SLTI, &&L_OP_SLTIU, &&L_OP_XORI, &&L_OP_ORI, &&L_OP_ANDI, &&L_OP_SLLI, &&L_OP_SRLI,
+        &&L_OP_SRAI, &&L_OP_ADD, &&L_OP_SUB, &&L_OP_SLL, &&L_OP_SLT, &&L_OP_SLTU, &&L_OP_XOR, &&L_OP_SRL,
+        &&L_OP_SRA, &&L_OP_OR, &&L_OP_AND, &&L_OP_MUL, &&L_OP_MULH, &&L_OP_MULHSU, &&L_OP_MULHU, &&L_OP_DIV,
+        &&L_OP_DIVU, &&L_OP_REM, &&L_OP_REMU, &&L_OP_FENCE, &&L_OP_END,
+    };
+    static_assert(sizeof(kHandlers) / sizeof(kHandlers[0]) == OP_END + 1, "handler table out of sync");
+#define OPCASE(name) L_##name:
+#define NEXT()                     \
+    do {                           \
+        ++o;                       \
+        goto *kHandlers[o->op];    \
+    } while (0)
+#else
+#define OPCASE(name) case name:
+#define NEXT()                     \
+    do {                           \
+        ++o;                       \
+        goto dispatch;             \
+    } while (0)
+#endif
+#define A r[o->rs1]
+#define C r[o->rs2]
+#define D r[o->rd]
+
     while (n < max_instructions) {
         if (attention_) {
             if (halted || stop_) break;
@@ -375,100 +472,185 @@ uint64_t Rv32Cpu::run(uint64_t max_instructions) {
             }
             attention_ = (mip & (mie | mie_bypass)) != 0;
         }
-        if (pc - hook_lo < hook_hi - hook_lo && hook) {
+        if (hooked && pc - hook_lo < hook_hi - hook_lo) {
             if (hook(*this)) {
                 ++n;
+                ++instret;
                 cycles += cycle_cost;
                 continue;
             }
             if (halted) break;
         }
-        Decoded& d = cache[(pc >> 1) & mask];
-        if (d.pc != pc) {
-            uint32_t raw = bus_.read<2>(pc);
-            const bool is32 = (raw & 3) == 3;
-            if (is32) raw |= bus_.read<2>(pc + 2) << 16;
-            uint32_t insn = raw;
-            if (!is32 && !expand_compressed(uint16_t(raw), &insn)) {
-                trap(kIllegal, raw);
-                attention_ = true;
-                ++n;
-                cycles += cycle_cost;
-                continue;
-            }
-            decode(insn, is32 ? 4 : 2, raw, d);
+
+        // Time and pc are only written back at the end of the block, or when
+        // code outside it may look at them (sync).
+        const Block* b = &blocks_[(pc >> 1) & mask];
+        if (b->pc != pc) b = translate(pc, kMaxBlockOps);
+        if (b->count > max_instructions - n) b = translate(pc, uint32_t(max_instructions - n));
+        const Op* const ops = b->ops;
+        uint32_t next = 0;
+        const uint64_t base = cycles;
+        const uint32_t cost = cycle_cost;
+        const Op* o = ops;
+        uint32_t done;
+        auto sync = [&] {
+            pc = o->pc;
+            cycles = base + uint64_t(o - ops) * cost;
+        };
+
+        // A load from MMIO may have raised an interrupt or a stop: leave the
+        // block after it.
+#define LOAD(N, T)                                                         \
+    {                                                                      \
+        const uint32_t ea = A + o->imm;                                    \
+        const Bus::Page& p = bus_.page(ea);                                \
+        const uint32_t off = ea & Bus::kPageMask;                          \
+        if (p.ptr && off <= Bus::kPageSize - N) {                          \
+            T t;                                                           \
+            std::memcpy(&t, p.ptr + off, N);                               \
+            D = uint32_t(t);                                               \
+            NEXT();                                                        \
+        }                                                                  \
+        sync();                                                            \
+        D = uint32_t(T(bus_.read<N>(ea)));                                 \
+        if (!attention_) NEXT();                                           \
+        next = o[1].pc;                                                    \
+        ++o;                                                               \
+        goto out;                                                          \
+    }
+        // MMIO and stores into translated code take the bus slow path and
+        // then return to the run loop, which picks up interrupts, clock
+        // changes and new code.
+#define STORE(N)                                                           \
+    {                                                                      \
+        const uint32_t ea = A + o->imm, v = C;                             \
+        const Bus::Page& p = bus_.page(ea);                                \
+        const uint32_t off = ea & Bus::kPageMask;                          \
+        lr_valid_ = false;                                                 \
+        if (p.ptr && off <= Bus::kPageSize - N) {                          \
+            if (!p.writable) NEXT(); /* ROM, flash cache: ignored */       \
+            if (!(p.code[off >> 2] | p.code[(off + N - 1) >> 2])) {        \
+                std::memcpy(p.ptr + off, &v, N);                           \
+                NEXT();                                                    \
+            }                                                              \
+        }                                                                  \
+        sync();                                                            \
+        bus_.write<N>(ea, v);                                              \
+        pc = o[1].pc;                                                      \
+        goto out_synced;                                                   \
+    }
+#define BRANCH(cond)                                                       \
+    {                                                                      \
+        if (cond) {                                                        \
+            next = o->imm;                                                 \
+            ++o;                                                           \
+            goto out;                                                      \
+        }                                                                  \
+        NEXT();                                                            \
+    }
+
+#ifdef RV_THREADED
+        goto *kHandlers[o->op];
+#else
+    dispatch:
+        switch (o->op) {
+#endif
+        OPCASE(OP_LUI) { D = o->imm; NEXT(); }
+        OPCASE(OP_JAL) { D = o[1].pc; next = o->imm; ++o; goto out; }
+        OPCASE(OP_JALR) { next = (A + o->imm) & ~1u; D = o[1].pc; ++o; goto out; }
+        OPCASE(OP_BEQ) BRANCH(A == C)
+        OPCASE(OP_BNE) BRANCH(A != C)
+        OPCASE(OP_BLT) BRANCH(int32_t(A) < int32_t(C))
+        OPCASE(OP_BGE) BRANCH(int32_t(A) >= int32_t(C))
+        OPCASE(OP_BLTU) BRANCH(A < C)
+        OPCASE(OP_BGEU) BRANCH(A >= C)
+        OPCASE(OP_LB) LOAD(1, int8_t)
+        OPCASE(OP_LH) LOAD(2, int16_t)
+        OPCASE(OP_LW) LOAD(4, uint32_t)
+        OPCASE(OP_LBU) LOAD(1, uint8_t)
+        OPCASE(OP_LHU) LOAD(2, uint16_t)
+        OPCASE(OP_SB) STORE(1)
+        OPCASE(OP_SH) STORE(2)
+        OPCASE(OP_SW) STORE(4)
+        OPCASE(OP_ADDI) { D = A + o->imm; NEXT(); }
+        OPCASE(OP_SLTI) { D = int32_t(A) < int32_t(o->imm); NEXT(); }
+        OPCASE(OP_SLTIU) { D = A < o->imm; NEXT(); }
+        OPCASE(OP_XORI) { D = A ^ o->imm; NEXT(); }
+        OPCASE(OP_ORI) { D = A | o->imm; NEXT(); }
+        OPCASE(OP_ANDI) { D = A & o->imm; NEXT(); }
+        OPCASE(OP_SLLI) { D = A << o->imm; NEXT(); }
+        OPCASE(OP_SRLI) { D = A >> o->imm; NEXT(); }
+        OPCASE(OP_SRAI) { D = uint32_t(int32_t(A) >> o->imm); NEXT(); }
+        OPCASE(OP_ADD) { D = A + C; NEXT(); }
+        OPCASE(OP_SUB) { D = A - C; NEXT(); }
+        OPCASE(OP_SLL) { D = A << (C & 31); NEXT(); }
+        OPCASE(OP_SLT) { D = int32_t(A) < int32_t(C); NEXT(); }
+        OPCASE(OP_SLTU) { D = A < C; NEXT(); }
+        OPCASE(OP_XOR) { D = A ^ C; NEXT(); }
+        OPCASE(OP_SRL) { D = A >> (C & 31); NEXT(); }
+        OPCASE(OP_SRA) { D = uint32_t(int32_t(A) >> (C & 31)); NEXT(); }
+        OPCASE(OP_OR) { D = A | C; NEXT(); }
+        OPCASE(OP_AND) { D = A & C; NEXT(); }
+        OPCASE(OP_MUL) { D = A * C; NEXT(); }
+        OPCASE(OP_MULH) { D = uint32_t((int64_t(int32_t(A)) * int64_t(int32_t(C))) >> 32); NEXT(); }
+        OPCASE(OP_MULHSU) { D = uint32_t((int64_t(int32_t(A)) * int64_t(uint64_t(C))) >> 32); NEXT(); }
+        OPCASE(OP_MULHU) { D = uint32_t((uint64_t(A) * uint64_t(C)) >> 32); NEXT(); }
+        OPCASE(OP_DIV) {
+            const uint32_t a = A, c = C;
+            D = c == 0 ? 0xFFFFFFFFu : (a == 0x80000000u && c == 0xFFFFFFFFu) ? a : uint32_t(int32_t(a) / int32_t(c));
+            NEXT();
         }
-        exec(d);
+        OPCASE(OP_DIVU) { const uint32_t a = A, c = C; D = c ? a / c : 0xFFFFFFFFu; NEXT(); }
+        OPCASE(OP_REM) {
+            const uint32_t a = A, c = C;
+            D = c == 0 ? a : (a == 0x80000000u && c == 0xFFFFFFFFu) ? 0 : uint32_t(int32_t(a) % int32_t(c));
+            NEXT();
+        }
+        OPCASE(OP_REMU) { const uint32_t a = A, c = C; D = c ? a % c : a; NEXT(); }
+        OPCASE(OP_FENCE) { NEXT(); }
+        OPCASE(OP_END) { next = o->pc; goto out; }
+        OPCASE(OP_SLOW)
+        OPCASE(OP_CILL) {  // always the last op of a block
+            sync();
+            done = uint32_t(o - ops);
+            instret += done;  // minstret reads see the instructions before this one
+            n += done;
+            if (o->op == OP_CILL) trap(kIllegal, o->imm);
+            else execute(o->imm, o->rd);
+            attention_ = true;  // CSR writes, traps, WFI, AMOs
+            ++o;
+            goto out_synced_counted;
+        }
+#ifndef RV_THREADED
+        }
+#endif
+    out:
+        done = uint32_t(o - ops);
+        pc = next;
+        cycles = base + uint64_t(done) * cost;
+        instret += done;
+        n += done;
+        continue;
+    out_synced:  // pc and cycles are exact up to the start of instruction o
+        done = uint32_t(o - ops) + 1;
+        instret += done;
+        n += done;
+        cycles += cycle_cost;
+        continue;
+    out_synced_counted:  // the same after a slow-path instruction, already counted
+        ++instret;
         ++n;
         cycles += cycle_cost;
     }
-    instret += n;
     return n;
-}
-
-void Rv32Cpu::exec(const Decoded& d) {
-    const uint32_t a = x[d.rs1], b = x[d.rs2];
-    const uint32_t imm = uint32_t(d.imm);
-    uint32_t next = pc + d.len;
-    uint32_t r;
-    switch (d.op) {
-    case OP_LUI: r = imm; break;
-    case OP_AUIPC: r = pc + imm; break;
-    case OP_JAL: r = next; next = pc + imm; break;
-    case OP_JALR: r = next; next = (a + imm) & ~1u; break;
-    case OP_BEQ: if (a == b) next = pc + imm; pc = next; return;
-    case OP_BNE: if (a != b) next = pc + imm; pc = next; return;
-    case OP_BLT: if (int32_t(a) < int32_t(b)) next = pc + imm; pc = next; return;
-    case OP_BGE: if (int32_t(a) >= int32_t(b)) next = pc + imm; pc = next; return;
-    case OP_BLTU: if (a < b) next = pc + imm; pc = next; return;
-    case OP_BGEU: if (a >= b) next = pc + imm; pc = next; return;
-    case OP_LB: r = uint32_t(sext(bus_.read<1>(a + imm), 8)); break;
-    case OP_LH: r = uint32_t(sext(bus_.read<2>(a + imm), 16)); break;
-    case OP_LW: r = bus_.read<4>(a + imm); break;
-    case OP_LBU: r = bus_.read<1>(a + imm); break;
-    case OP_LHU: r = bus_.read<2>(a + imm); break;
-    case OP_SB: bus_.write<1>(a + imm, b); invalidate(a + imm); lr_valid_ = false; pc = next; return;
-    case OP_SH: bus_.write<2>(a + imm, b); invalidate(a + imm); lr_valid_ = false; pc = next; return;
-    case OP_SW: bus_.write<4>(a + imm, b); invalidate(a + imm); invalidate(a + imm + 2); lr_valid_ = false; pc = next; return;
-    case OP_ADDI: r = a + imm; break;
-    case OP_SLTI: r = int32_t(a) < int32_t(imm); break;
-    case OP_SLTIU: r = a < imm; break;
-    case OP_XORI: r = a ^ imm; break;
-    case OP_ORI: r = a | imm; break;
-    case OP_ANDI: r = a & imm; break;
-    case OP_SLLI: r = a << imm; break;
-    case OP_SRLI: r = a >> imm; break;
-    case OP_SRAI: r = uint32_t(int32_t(a) >> imm); break;
-    case OP_ADD: r = a + b; break;
-    case OP_SUB: r = a - b; break;
-    case OP_SLL: r = a << (b & 31); break;
-    case OP_SLT: r = int32_t(a) < int32_t(b); break;
-    case OP_SLTU: r = a < b; break;
-    case OP_XOR: r = a ^ b; break;
-    case OP_SRL: r = a >> (b & 31); break;
-    case OP_SRA: r = uint32_t(int32_t(a) >> (b & 31)); break;
-    case OP_OR: r = a | b; break;
-    case OP_AND: r = a & b; break;
-    case OP_MUL: r = a * b; break;
-    case OP_MULH: r = uint32_t((int64_t(int32_t(a)) * int64_t(int32_t(b))) >> 32); break;
-    case OP_MULHSU: r = uint32_t((int64_t(int32_t(a)) * int64_t(uint64_t(b))) >> 32); break;
-    case OP_MULHU: r = uint32_t((uint64_t(a) * uint64_t(b)) >> 32); break;
-    case OP_DIV:
-        r = b == 0 ? 0xFFFFFFFFu : (a == 0x80000000u && b == 0xFFFFFFFFu) ? a : uint32_t(int32_t(a) / int32_t(b));
-        break;
-    case OP_DIVU: r = b ? a / b : 0xFFFFFFFFu; break;
-    case OP_REM:
-        r = b == 0 ? a : (a == 0x80000000u && b == 0xFFFFFFFFu) ? 0 : uint32_t(int32_t(a) % int32_t(b));
-        break;
-    case OP_REMU: r = b ? a % b : a; break;
-    case OP_FENCE: pc = next; return;
-    default:
-        execute(d.insn, d.len);
-        attention_ = true;  // CSR writes, traps, WFI, AMOs
-        return;
-    }
-    if (d.rd) x[d.rd] = r;
-    pc = next;
+#undef LOAD
+#undef STORE
+#undef BRANCH
+#undef OPCASE
+#undef NEXT
+#undef A
+#undef C
+#undef D
 }
 
 void Rv32Cpu::execute(uint32_t insn, uint32_t len) {
@@ -539,8 +721,6 @@ void Rv32Cpu::execute(uint32_t insn, uint32_t len) {
         case 2: bus_.write<4>(addr, b); break;
         default: trap(kIllegal, insn); return;
         }
-        invalidate(addr);
-        invalidate(addr + 2);
         lr_valid_ = false;
         break;
     }
@@ -606,8 +786,6 @@ void Rv32Cpu::execute(uint32_t insn, uint32_t len) {
         } else if (f5 == 3) {  // SC.W
             if (lr_valid_ && lr_addr_ == a) {
                 bus_.write<4>(a, b);
-                invalidate(a);
-                invalidate(a + 2);
                 result = 0;
             } else {
                 result = 1;
@@ -628,8 +806,6 @@ void Rv32Cpu::execute(uint32_t insn, uint32_t len) {
             default: trap(kIllegal, insn); return;
             }
             bus_.write<4>(a, nv);
-            invalidate(a);
-            invalidate(a + 2);
             result = old;
         }
         break;
