@@ -12,7 +12,7 @@ namespace esp32sim {
 
 class Rv32Cpu {
 public:
-    explicit Rv32Cpu(Bus& bus) : bus_(bus) {}
+    explicit Rv32Cpu(Bus& bus);
 
     void reset(uint32_t pc);
 
@@ -30,7 +30,7 @@ public:
     // gates its 31 interrupt lines in the interrupt matrix, not in mie.
     uint32_t mie_bypass = 0;
 
-    uint32_t x[32] = {};
+    uint32_t x[33] = {};  // x[32] is a scratch sink for writes to x0
     uint32_t pc = 0;
     // `cycles` is the SoC time base (ticks of the fastest CPU clock). Each
     // instruction costs `cycle_cost` ticks, so a core clocked at a quarter of
@@ -65,46 +65,52 @@ public:
 
     static int expand_compressed(uint16_t c, uint32_t* out);  // returns 0 if illegal
 
-    // Drop cached decodes. Must be called when code memory changes behind the
-    // CPU's back (loader writes, flash writes, MMU remaps). CPU stores
-    // invalidate the affected entries themselves.
+    // Drop translated code. Must be called when code memory changes behind the
+    // CPU's back (loader writes, flash writes, MMU remaps). CPU stores to
+    // translated code are caught by the bus code map (Bus::on_code_write).
     void flush_icache();
 
     // Stop run() before the next instruction (e.g. a peripheral reset the chip).
     void request_stop() { stop_ = true; attention_ = true; }
 
-    // Pre-decoded instruction, cached per address.
-    struct Decoded {
-        uint32_t pc = 1;     // tag (odd = invalid)
-        uint32_t raw = 0;    // original encoding, to detect modified code
-        uint16_t op = 0;
-        uint8_t rd = 0, rs1 = 0, rs2 = 0, len = 0;
-        int32_t imm = 0;
-        uint32_t insn = 0;   // expanded 32-bit encoding (slow path)
-    };
-
 private:
+    // Code is translated into basic blocks: runs of pre-decoded instructions
+    // that end at a jump, a branch or an instruction handled by the generic
+    // slow path (CSR, AMO, SYSTEM). A block executes without per-instruction
+    // bookkeeping; time and pc are only materialised when something can see
+    // them (MMIO, traps, the end of the block).
+    struct Op {
+        uint8_t op, rd, rs1, rs2;
+        uint32_t imm;  // immediate, precomputed target, or the raw encoding for slow ops
+        uint32_t pc;
+    };
+    struct Block {
+        uint32_t pc = 1;     // tag (odd = invalid)
+        uint32_t count = 0;  // instructions; ops[count] is an end marker holding the next pc
+        Op* ops = nullptr;
+    };
+    static constexpr uint32_t kBlockBits = 14, kMaxBlockOps = 64, kArenaOps = 1u << 18;
+
     uint64_t core_acc_ = 0, core_mark_ = 0;
-    void decode(uint32_t insn, uint32_t len, uint32_t raw, Decoded& d);
-    void exec(const Decoded& d);
+    // Translate the block at pc into the cache, or, with max_ops below
+    // kMaxBlockOps, a short uncached one for the end of a run() budget.
+    const Block* translate(uint32_t pc, uint32_t max_ops);
+    void decode(uint32_t insn, uint32_t len, uint32_t raw, Op& o, bool& ends_block);
     void trap(uint32_t cause, uint32_t tval);
     bool csr_access(uint32_t csr, uint32_t* old, uint32_t newval, bool do_write);
     bool check_interrupts();
     void execute(uint32_t insn, uint32_t len);
 
     Bus& bus_;
-    static constexpr uint32_t kCacheBits = 15;
-    std::unique_ptr<Decoded[]> icache_{new Decoded[1u << kCacheBits]};
+    std::unique_ptr<Block[]> blocks_{new Block[1u << kBlockBits]};
+    std::unique_ptr<Op[]> arena_{new Op[kArenaOps]};
+    uint32_t arena_used_ = 0;
+    Block partial_;
+    std::unique_ptr<Op[]> partial_ops_{new Op[kMaxBlockOps + 1]};
     uint32_t lr_addr_ = 0;
     bool lr_valid_ = false;
     bool stop_ = false;
     bool attention_ = true;  // re-check halted/irq/wfi state before the next instruction
-    void invalidate(uint32_t addr) {
-        const uint32_t mask = (1u << kCacheBits) - 1;
-        icache_[(addr >> 1) & mask].pc = 1;
-        icache_[((addr >> 1) + 1) & mask].pc = 1;
-        icache_[((addr - 2) >> 1) & mask].pc = 1;
-    }
 };
 
 }  // namespace esp32sim

@@ -64,6 +64,19 @@ Preferences, LittleFS, crypto, LEDC, Wire, SPI, analogRead, restart) and every
 test passes, with `Serial` on UART0 and on USB CDC. See
 [Arduino compatibility suite](#arduino-compatibility-suite).
 
+## Speed
+
+CPU-bound code runs at about 500 MIPS on a 2.1 GHz Xeon cloud VM, over three
+times the speed of a real 160 MHz ESP32-C3 (`tests/cpu_bench.py`, see
+`firmware/bench/README.md`). The CPU translates code into basic blocks of
+pre-decoded instructions and runs them through threaded dispatch (a switch on
+compilers without computed goto, such as MSVC). Each instruction still costs
+one CPU clock on the emulated time base, and SYSTIMER, the timer groups and the
+watchdogs count emulated cycles, so firmware sees the same timing at any host
+speed. By default the emulator paces itself to real time (`--speed 1`); use
+`--speed 0` to run flat out. An idle FreeRTOS app (waiting in `wfi`) costs
+almost no host CPU.
+
 ## Not there yet (roadmap)
 
 1. **More peripherals.** RMT, I2S, TWAI, the C6's PARLIO, and continuous
@@ -74,11 +87,7 @@ test passes, with `Serial` on UART0 and on USB CDC. See
    model.
 2. **More chips.** The ESP32-H2 is close to the C6 and should come next. The
    ESP32, S2 and S3 need an Xtensa LX6/LX7 core.
-3. **Speed.** The emulator runs at about 110-150 MIPS here, roughly 70-95% of
-   a real 160 MHz C3. Timers follow emulated cycles, so firmware timing stays
-   correct even when wall-clock speed is lower, and an idle FreeRTOS app
-   (waiting in `wfi`) costs almost no host CPU.
-4. **Windows testing.** The Windows build cross-compiles with MinGW-w64, and
+3. **Windows testing.** The Windows build cross-compiles with MinGW-w64, and
    `--com` uses the standard Win32 serial API, but neither has been run on
    Windows yet, and MSVC has not been tried.
 
@@ -249,6 +258,10 @@ partition table + app path, with the 2nd-stage bootloader step emulated. To
 rebuild: `python3 firmware/hello/build.py`
 (needs clang with the RISC-V target, ld.lld and esptool).
 
+`firmware/bench` is a bare-metal CPU benchmark with a self-checking checksum;
+`tests/cpu_bench.py` runs it and reports the emulator's speed. See
+`firmware/bench/README.md`.
+
 ## Arduino compatibility suite
 
 `firmware/arduino-compat` is an Arduino sketch that checks the Arduino-ESP32
@@ -280,7 +293,7 @@ MCU, CPU clock, flash size, RAM, name and vendor.
 ## Layout
 
 ```
-src/core/        RV32 CPU interpreter, memory bus (16 KiB page table + MMIO slow path)
+src/core/        RV32 CPU (basic-block translating interpreter), memory bus (16 KiB page table + MMIO slow path)
 src/soc/         chip interface, shared RISC-V SoC core (riscv_soc), ROM high-level emulation (esp_rom),
                  SPI flash + SPI_MEM controller, auto-reset circuit
 src/soc/esp32c3/ ESP32-C3 SoC; its peripherals, timers, GPIO, interrupt matrix and SHA are shared with the C6
@@ -291,7 +304,7 @@ boards/layouts/  board pictures' pin positions for the UI; boards/images/ the pi
 src/boards/      PlatformIO board catalogue
 src/util/        zlib inflate, MD5, JSON and ELF readers, logging
 tests/           unit tests (C++), end-to-end esptool, ESP-IDF, Arduino and web UI tests (Python)
-firmware/        ESP-IDF hello_world and GPIO demo, Arduino compatibility sketch (prebuilt), bare-metal demo
+firmware/        ESP-IDF hello_world and GPIO demo, Arduino compatibility sketch (prebuilt), bare-metal demo and CPU benchmark
 roms/            Espressif mask-ROM images (Apache-2.0)
 tools/           board list updater, ROM downloader, Arduino sketch builder
 ```

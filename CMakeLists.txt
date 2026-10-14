@@ -126,6 +126,11 @@ if(Python3_FOUND)
     set_tests_properties(gpio_ui gpio_ui_c6 PROPERTIES SKIP_RETURN_CODE 77)
   endif()
 
+  # CPU benchmark (firmware/bench): checksums, cycle timing, and the speed.
+  add_test(NAME cpu_bench
+           COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/cpu_bench.py
+                   --emulator $<TARGET_FILE:esp32sim>)
+
   # Arduino-ESP32 compatibility suite (firmware/arduino-compat): one test per
   # chip and sketch build found in prebuilt/, plus a check that every chip
   # the emulator reports as emulated has a build, so a new chip can't skip it.

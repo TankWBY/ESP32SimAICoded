@@ -100,6 +100,50 @@ static void test_trap_and_mret() {
     CHECK(cpu.mcause == 11);
 }
 
+// Code patched through a second address of the same RAM (like the C3's data
+// bus alias of IRAM) must run in its new form the next time round.
+static void test_self_modifying_code() {
+    RamBus bus;
+    bus.map(0x50000000, bus.mem.data(), 0x10000, true);
+    Rv32Cpu cpu(bus);
+    const uint32_t prog[] = {
+        0x00100513,  // loop: addi a0, x0, 1   (patched to addi a0, x0, 2)
+        0x00a40433,  //       add  s0, s0, a0
+        0x0062a023,  //       sw   t1, 0(t0)
+        0x00148493,  //       addi s1, s1, 1
+        0x00200393,  //       addi t2, x0, 2
+        0xfe74c6e3,  //       blt  s1, t2, loop
+        0x00100073,  //       ebreak
+    };
+    for (size_t i = 0; i < sizeof(prog) / 4; ++i) bus.put32(0x40000000 + 4 * uint32_t(i), prog[i]);
+    bool brk = false;
+    cpu.on_fatal_trap = [&](Rv32Cpu&, uint32_t cause, uint32_t) { brk = cause == 3; };
+    cpu.reset(0x40000000);
+    cpu.x[5] = 0x50000000;  // t0: the patched instruction, through the alias
+    cpu.x[6] = 0x00200513;  // t1: addi a0, x0, 2
+    cpu.run(100);
+    CHECK(brk);
+    CHECK(cpu.x[8] == 1 + 2);
+}
+
+// run(n) executes exactly n instructions, and time and minstret follow.
+static void test_run_budget() {
+    RamBus bus;
+    Rv32Cpu cpu(bus);
+    for (uint32_t i = 0; i < 200; ++i) bus.put32(0x40000000 + 4 * i, 0x00140413);  // addi s0, s0, 1
+    cpu.reset(0x40000000);
+    cpu.set_cycle_cost(2);
+    const uint64_t c0 = cpu.cycles;
+    CHECK(cpu.run(37) == 37);
+    CHECK(cpu.x[8] == 37);
+    CHECK(cpu.pc == 0x40000000 + 4 * 37);
+    CHECK(cpu.instret == 37);
+    CHECK(cpu.cycles - c0 == 74);
+    CHECK(cpu.run(100) == 100);
+    CHECK(cpu.x[8] == 137);
+    CHECK(cpu.instret == 137);
+}
+
 static void test_compressed_decode() {
     uint32_t out;
     CHECK(Rv32Cpu::expand_compressed(0x0000, &out) == 0);  // illegal
@@ -237,6 +281,8 @@ int main() {
     test_base_isa();
     test_compressed_loop();
     test_trap_and_mret();
+    test_self_modifying_code();
+    test_run_budget();
     test_compressed_decode();
     test_md5_inflate();
     if (g_failures) {
