@@ -31,7 +31,12 @@ add_library(esp32sim_core STATIC
   src/soc/esp32c3/gpio_signals.cpp
   src/soc/esp32c3/intmatrix.cpp
   src/soc/esp32c3/timers.cpp
-  src/soc/esp32c3/rom_hle.cpp
+  src/soc/esp32c6/esp32c6.cpp
+  src/soc/esp32c6/peripherals.cpp
+  src/soc/esp32c6/gpio_pads.cpp
+  src/soc/esp32c6/gpio_signals.cpp
+  src/soc/esp_rom.cpp
+  src/soc/riscv_soc.cpp
   src/soc/spi_flash.cpp
   src/soc/chip.cpp
   src/host/serial_host.cpp
@@ -105,11 +110,17 @@ if(Python3_FOUND)
     add_test(NAME idf_hello
              COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/idf_hello.py
                      --emulator $<TARGET_FILE:esp32sim>)
-    set_tests_properties(idf_hello PROPERTIES SKIP_RETURN_CODE 77)
+    add_test(NAME idf_hello_c6
+             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/idf_hello.py
+                     --emulator $<TARGET_FILE:esp32sim> --chip esp32c6)
+    set_tests_properties(idf_hello idf_hello_c6 PROPERTIES SKIP_RETURN_CODE 77)
     # Web UI API against the GPIO demo firmware.
     add_test(NAME gpio_ui
              COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/gpio_ui.py
                      --emulator $<TARGET_FILE:esp32sim>)
-    set_tests_properties(gpio_ui PROPERTIES SKIP_RETURN_CODE 77)
+    add_test(NAME gpio_ui_c6
+             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/gpio_ui.py
+                     --emulator $<TARGET_FILE:esp32sim> --chip esp32c6)
+    set_tests_properties(gpio_ui gpio_ui_c6 PROPERTIES SKIP_RETURN_CODE 77)
   endif()
 endif()

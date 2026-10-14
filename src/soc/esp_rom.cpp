@@ -1,9 +1,10 @@
-#include "soc/esp32c3/rom_hle.hpp"
+#include "soc/esp_rom.hpp"
 
 #include <cstdio>
 #include <cstring>
 
-#include "soc/esp32c3/esp32c3.hpp"
+#include "core/rv32.hpp"
+#include "soc/spi_flash.hpp"
 #include "util/inflate.hpp"
 #include "util/log.hpp"
 #include "util/md5.hpp"
@@ -25,7 +26,6 @@ enum Op : uint8_t {
 constexpr uint8_t ERR_INVALID_MSG = 0x05, ERR_FAILED = 0x06, ERR_BAD_CRC = 0x07, ERR_FLASH_WRITE = 0x08,
                   ERR_FLASH_READ = 0x09, ERR_DEFLATE = 0x0B;
 
-constexpr uint32_t kImageChipId = 5;  // ESP32-C3
 constexpr uint32_t kDirectBootMagic = 0xAEDB041D;
 
 uint32_t le32(const uint8_t* p) { return uint32_t(p[0]) | (uint32_t(p[1]) << 8) | (uint32_t(p[2]) << 16) | (uint32_t(p[3]) << 24); }
@@ -56,8 +56,7 @@ bool in_range(uint32_t a, uint32_t lo, uint32_t hi) { return a >= lo && a < hi; 
 
 // ------------------------------------------------------------------ reset
 
-void Esp32c3Rom::on_reset(BootMode mode) {
-    using namespace c3map;
+void EspRom::on_reset(BootMode mode) {
     download_mode_ = mode == BootMode::Download;
     in_frame_ = escape_ = false;
     frame_.clear();
@@ -65,23 +64,25 @@ void Esp32c3Rom::on_reset(BootMode mode) {
     defl_buf_.clear();
 
     char line[128];
-    soc_.console_write("ESP-ROM:esp32c3-api1-20210207\r\nBuild:Feb  7 2021\r\n");
+    soc_.console_write(p_.banner);
     uint32_t r = soc_.reset_reason();
     if (download_mode_) {
-        std::snprintf(line, sizeof line, "rst:0x%x (%s),boot:0x4 (DOWNLOAD(USB/UART0/1))\r\n", r, reset_reason_name(r));
+        std::snprintf(line, sizeof line, "rst:0x%x (%s),boot:0x%x (DOWNLOAD(USB/UART0/1))\r\n", r, reset_reason_name(r),
+                      p_.boot_download);
         soc_.console_write(line);
         soc_.console_write("waiting for download\r\n");
         LOGI("rom: download mode, waiting for esptool");
         return;
     }
-    std::snprintf(line, sizeof line, "rst:0x%x (%s),boot:0xc (SPI_FAST_FLASH_BOOT)\r\n", r, reset_reason_name(r));
+    std::snprintf(line, sizeof line, "rst:0x%x (%s),boot:0x%x (SPI_FAST_FLASH_BOOT)\r\n", r, reset_reason_name(r),
+                  p_.boot_flash);
     soc_.console_write(line);
     boot_flash();
 }
 
 // ------------------------------------------------------------------ flash boot
 
-bool Esp32c3Rom::parse_image(uint32_t offset, Image& img, std::string* error) {
+bool EspRom::parse_image(uint32_t offset, Image& img, std::string* error) {
     SpiFlash& fl = soc_.flash();
     uint8_t hdr[24];
     fl.read(offset, hdr, sizeof hdr);
@@ -96,8 +97,9 @@ bool Esp32c3Rom::parse_image(uint32_t offset, Image& img, std::string* error) {
     img.spi_speed_size = hdr[3];
     img.entry = le32(hdr + 4);
     img.chip_id = uint16_t(hdr[12] | (hdr[13] << 8));
-    if (img.chip_id != kImageChipId) {
-        std::snprintf(buf, sizeof buf, "image is for chip id %u, not ESP32-C3 (%u)", img.chip_id, kImageChipId);
+    if (img.chip_id != p_.image_chip_id) {
+        std::snprintf(buf, sizeof buf, "image is for chip id %u, not %s (%u)", img.chip_id, p_.chip_name.c_str(),
+                      p_.image_chip_id);
         *error = buf;
         return false;
     }
@@ -130,7 +132,7 @@ bool Esp32c3Rom::parse_image(uint32_t offset, Image& img, std::string* error) {
     return true;
 }
 
-bool Esp32c3Rom::find_app_partition(uint32_t* offset, std::string* label) {
+bool EspRom::find_app_partition(uint32_t* offset, std::string* label) {
     SpiFlash& fl = soc_.flash();
     const uint32_t table = 0x8000;
     uint32_t found_ota0 = 0;
@@ -160,8 +162,7 @@ bool Esp32c3Rom::find_app_partition(uint32_t* offset, std::string* label) {
     return false;
 }
 
-void Esp32c3Rom::boot_flash() {
-    using namespace c3map;
+void EspRom::boot_flash() {
     SpiFlash& fl = soc_.flash();
     uint8_t head[8];
     fl.read(0, head, 8);
@@ -169,12 +170,12 @@ void Esp32c3Rom::boot_flash() {
     // ROM "direct boot": flash starts with the magic word twice; the ROM maps
     // flash 1:1 into the cache windows and jumps to IROM + 8.
     if (le32(head) == kDirectBootMagic && le32(head + 4) == kDirectBootMagic) {
-        uint32_t pages = fl.size() / Bus::kPageSize;
-        if (pages > c3::Mmu::kEntries) pages = c3::Mmu::kEntries;
-        for (uint32_t i = 0; i < pages; ++i) soc_.mmu().set_entry(int(i), i);
+        uint32_t pages = fl.size() / 0x10000u;
+        if (pages > p_.mmu_entries) pages = p_.mmu_entries;
+        for (uint32_t i = 0; i < pages; ++i) soc_.set_mmu_entry(int(i), i);
         soc_.console_write("SPIWP:0xee\r\nmode:DIO, clock div:1\r\n");
         LOGI("rom: direct boot");
-        soc_.start_cpu(IROM_BASE + 8);
+        soc_.start_cpu(p_.cache.front().base + 8);
         return;
     }
 
@@ -192,8 +193,7 @@ void Esp32c3Rom::boot_flash() {
     // (pick the app partition, map flash, jump) at a high level.
     bool rom_stage_only_ram = true;
     for (const auto& s : boot_img.segments)
-        if (in_range(s.addr, IROM_BASE, IROM_BASE + CACHE_WINDOW) || in_range(s.addr, DROM_BASE, DROM_BASE + CACHE_WINDOW))
-            rom_stage_only_ram = false;
+        if (cache_window(s.addr)) rom_stage_only_ram = false;
     uint32_t app_off = 0;
     std::string label;
     if (rom_stage_only_ram && !soc_.has_real_rom() && find_app_partition(&app_off, &label)) {
@@ -214,8 +214,19 @@ void Esp32c3Rom::boot_flash() {
     load_and_run(boot_img, true);
 }
 
-void Esp32c3Rom::load_and_run(const Image& img, bool print_rom_log) {
-    using namespace c3map;
+const RomProfile::Range* EspRom::cache_window(uint32_t addr) const {
+    for (const auto& w : p_.cache)
+        if (in_range(addr, w.base, w.base + w.size)) return &w;
+    return nullptr;
+}
+
+bool EspRom::in_ram(uint32_t addr) const {
+    for (const auto& r : p_.ram)
+        if (in_range(addr, r.base, r.base + r.size)) return true;
+    return false;
+}
+
+void EspRom::load_and_run(const Image& img, bool print_rom_log) {
     static const char* modes[] = {"QIO", "QOUT", "DIO", "DOUT", "FAST_READ", "SLOW_READ"};
     char line[96];
     if (print_rom_log) {
@@ -227,22 +238,18 @@ void Esp32c3Rom::load_and_run(const Image& img, bool print_rom_log) {
     SpiFlash& fl = soc_.flash();
     std::vector<uint8_t> buf;
     for (const auto& s : img.segments) {
-        bool irom = in_range(s.addr, IROM_BASE, IROM_BASE + CACHE_WINDOW);
-        bool drom = in_range(s.addr, DROM_BASE, DROM_BASE + CACHE_WINDOW);
-        if (irom || drom) {
+        if (const RomProfile::Range* w = cache_window(s.addr)) {
             // Flash-mapped: point the MMU entries at the segment's flash pages.
             if ((s.addr & 0xFFFF) != (s.flash_offset & 0xFFFF))
                 LOGW("rom: segment 0x%08x not 64 KiB-aligned with its flash offset 0x%x", s.addr, s.flash_offset);
-            uint32_t first = (s.addr & (CACHE_WINDOW - 1)) >> 16;
-            uint32_t last = ((s.addr + (s.len ? s.len - 1 : 0)) & (CACHE_WINDOW - 1)) >> 16;
+            uint32_t first = (s.addr - w->base) >> 16;
+            uint32_t last = (s.addr - w->base + (s.len ? s.len - 1 : 0)) >> 16;
             uint32_t page = s.flash_offset >> 16;
-            for (uint32_t i = first; i <= last; ++i) soc_.mmu().set_entry(int(i), page + (i - first));
-            LOGD("rom: map %s 0x%08x len 0x%x -> flash 0x%x", irom ? "IROM" : "DROM", s.addr, s.len, s.flash_offset);
+            for (uint32_t i = first; i <= last; ++i) soc_.set_mmu_entry(int(i), page + (i - first));
+            LOGD("rom: map 0x%08x len 0x%x -> flash 0x%x", s.addr, s.len, s.flash_offset);
             continue;
         }
-        bool ram = in_range(s.addr, SRAM0_BASE, SRAM_END_IRAM) || in_range(s.addr, DRAM_BASE, DRAM_BASE + DRAM_SIZE) ||
-                   in_range(s.addr, RTC_FAST_BASE, RTC_FAST_BASE + RTC_FAST_SIZE);
-        if (!ram) {
+        if (!in_ram(s.addr)) {
             if (s.addr == 0) continue;  // elf2image alignment padding
             LOGW("rom: skipping segment at unsupported address 0x%08x", s.addr);
             continue;
@@ -264,14 +271,14 @@ void Esp32c3Rom::load_and_run(const Image& img, bool print_rom_log) {
 
 // ------------------------------------------------------------------ ROM routines
 
-bool Esp32c3Rom::call(Rv32Cpu& cpu) {
+bool EspRom::call(Rv32Cpu& cpu) {
     (void)cpu;
     return false;  // no ROM routines are emulated yet
 }
 
 // ------------------------------------------------------------------ download mode
 
-void Esp32c3Rom::feed(const uint8_t* data, size_t len) {
+void EspRom::feed(const uint8_t* data, size_t len) {
     if (!download_mode_) return;
     for (size_t i = 0; i < len; ++i) {
         uint8_t b = data[i];
@@ -299,7 +306,7 @@ void Esp32c3Rom::feed(const uint8_t* data, size_t len) {
     }
 }
 
-void Esp32c3Rom::respond(uint8_t op, uint32_t val, const std::vector<uint8_t>& data, uint8_t status, uint8_t error) {
+void EspRom::respond(uint8_t op, uint32_t val, const std::vector<uint8_t>& data, uint8_t status, uint8_t error) {
     std::vector<uint8_t> p;
     uint16_t len = uint16_t(data.size() + 4);
     p.push_back(0x01);
@@ -320,10 +327,10 @@ void Esp32c3Rom::respond(uint8_t op, uint32_t val, const std::vector<uint8_t>& d
         else out.push_back(b);
     }
     out.push_back(0xC0);
-    soc_.console_write(out.data(), out.size());
+    soc_.console_write(std::string(out.begin(), out.end()));
 }
 
-void Esp32c3Rom::finish_deflate(uint8_t* status, uint8_t* error) {
+void EspRom::finish_deflate(uint8_t* status, uint8_t* error) {
     if (!defl_active_) return;
     defl_active_ = false;
     std::vector<uint8_t> out;
@@ -338,7 +345,7 @@ void Esp32c3Rom::finish_deflate(uint8_t* status, uint8_t* error) {
     defl_buf_.clear();
 }
 
-void Esp32c3Rom::handle_packet(const std::vector<uint8_t>& p) {
+void EspRom::handle_packet(const std::vector<uint8_t>& p) {
     if (p.size() < 8 || p[0] != 0x00) return;  // not a request
     const uint8_t op = p[1];
     const uint16_t len = uint16_t(p[2] | (p[3] << 8));
@@ -500,7 +507,7 @@ void Esp32c3Rom::handle_packet(const std::vector<uint8_t>& p) {
         put32(resp, 0);                           // flags: no secure boot, no secure download
         resp.push_back(0);                        // flash_crypt_cnt
         for (int i = 0; i < 7; ++i) resp.push_back(0);  // key purposes
-        put32(resp, kImageChipId);                // chip id
+        put32(resp, p_.image_chip_id);            // chip id
         put32(resp, 0);                           // api / eco version
         break;
 

@@ -48,6 +48,7 @@ uint32_t Uart::read(uint32_t off) {
     case uart::INT_RAW: return int_raw();
     case uart::INT_ST: return int_raw() & RegisterFile::read(uart::INT_ENA);
     case uart::STATUS: return uint32_t(rx_.size()) & 0x3FF;  // TX FIFO drains instantly
+    case 0x98: return 0;  // REG_UPDATE (C6): configuration synced at once
     default: return RegisterFile::read(off);
     }
 }
@@ -70,13 +71,12 @@ void Uart::write(uint32_t off, uint32_t value) {
 }
 
 // ---------------------------------------------------------------- EFUSE
-Efuse::Efuse(std::string name, const std::array<uint8_t, 6>& mac) : RegisterFile(std::move(name)) {
+Efuse::Efuse(std::string name, const std::array<uint8_t, 6>& mac, uint32_t sys3) : RegisterFile(std::move(name)) {
     // BLOCK1 (EFUSE_RD_MAC_SPI_SYS_n) starts at +0x44.
     set_default(0x44, (uint32_t(mac[2]) << 24) | (uint32_t(mac[3]) << 16) | (uint32_t(mac[4]) << 8) | mac[5]);
     set_default(0x48, (uint32_t(mac[0]) << 8) | mac[1]);
-    // Word 3: wafer version minor low bits [20:18] = 4 -> chip revision v0.4,
-    // pkg_version [23:21] = 0 (QFN32), flash_cap [29:27] = 0 (external flash).
-    set_default(0x50, 4u << 18);
+    // Word 3: chip revision and package.
+    set_default(0x50, sys3);
     set_default(0x58, 0);  // word 5: minor hi bit, major revision 0
     set_default(0x1FC, 0x2007200);  // DATE
 }
@@ -176,7 +176,7 @@ void SystemReg::write(uint32_t off, uint32_t value) {
 
 // ---------------------------------------------------------------- SYSCON
 uint32_t Syscon::read(uint32_t off) {
-    if (off == 0xB0) {  // WDEV_RND: xorshift64*, never returns the same value twice
+    if (off == rng_off_) {  // WDEV_RND: xorshift64*, never returns the same value twice
         rng_state_ ^= rng_state_ >> 12;
         rng_state_ ^= rng_state_ << 25;
         rng_state_ ^= rng_state_ >> 27;

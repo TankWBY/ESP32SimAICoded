@@ -1,8 +1,10 @@
 #pragma once
-// ESP32-C3 GPIO: the GPIO block (0x6000_4000: output/enable/input registers,
-// per-pin interrupt config, the GPIO matrix) and IO_MUX (0x6000_9000: pad
-// function, pulls, input enable). Pads have a resolved level that combines
-// what the chip drives, the pulls, and an external drive set by the UI.
+// GPIO of the RISC-V ESP32 chips: the GPIO block (output/enable/input
+// registers, per-pin interrupt config, the GPIO matrix) and IO_MUX (pad
+// function, pulls, input enable). The register layout is shared by the C3
+// (22 pads) and the C6 (31 pads); what differs per chip is described by a
+// GpioPads table. Pads have a resolved level that combines what the chip
+// drives, the pulls, and an external drive set by the UI.
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -17,15 +19,27 @@ struct SignalName {
     int index;
     const char* name;
 };
+// Per-chip pad description.
+struct GpioPads {
+    int pins;
+    const char* const* func0;     // IO_MUX function 0 of each pad ("GPIOn" = the GPIO matrix)
+    const char* const* func2;     // function 2 (nullptr where none)
+    uint32_t (*default_mux)(int pin);  // IO_MUX_GPIOn reset value
+    uint32_t flash_pads;          // pads wired to the SPI flash
+    int usb_dm, usb_dp;           // USB-Serial-JTAG pads
+    int u0txd;                    // pad whose function 0 is U0TXD (idles high)
+    const SignalName* out_signals;
+    size_t out_signal_count;
+    uint32_t date;                // GPIO_DATE_REG
+};
+extern const GpioPads kEsp32c3Pads;
 extern const SignalName kOutSignals[];
 extern const size_t kOutSignalCount;
-extern const SignalName kInSignals[];
-extern const size_t kInSignalCount;
 
 class Gpio : public Peripheral {
 public:
-    static constexpr int kPins = 22;
-    explicit Gpio(std::string name);
+    static constexpr int kMaxPins = 32;
+    Gpio(std::string name, const GpioPads& pads);
     uint32_t read(uint32_t off) override;
     void write(uint32_t off, uint32_t value) override;
     void reset() override;
@@ -55,16 +69,19 @@ private:
     int pad_level(int pin) const;
     void update();  // recompute input levels, interrupts, trace
 
+    const GpioPads& pads_;
+    const int pins_;
+    const uint32_t pin_mask_;
     IoMux iomux_;
     uint32_t out_ = 0, enable_ = 0, strap_ = 0, status_ = 0;
     uint32_t in_ = 0;                       // last resolved GPIO_IN
-    std::array<uint32_t, kPins> pin_cfg_{};  // GPIO_PINn
-    std::array<uint32_t, kPins> out_sel_{};  // GPIO_FUNCn_OUT_SEL_CFG
+    std::array<uint32_t, kMaxPins> pin_cfg_{};  // GPIO_PINn
+    std::array<uint32_t, kMaxPins> out_sel_{};  // GPIO_FUNCn_OUT_SEL_CFG
     std::array<uint32_t, 128> in_sel_{};     // GPIO_FUNCn_IN_SEL_CFG (by signal)
-    std::array<uint32_t, kPins> mux_{};      // IO_MUX_GPIOn
+    std::array<uint32_t, kMaxPins> mux_{};      // IO_MUX_GPIOn
     uint32_t mux_ctrl_ = 0;
-    std::array<int, kPins> external_{};
-    std::array<int, kPins> traced_{};
+    std::array<int, kMaxPins> external_{};
+    std::array<int, kMaxPins> traced_{};
     uint64_t version_ = 0;
 };
 

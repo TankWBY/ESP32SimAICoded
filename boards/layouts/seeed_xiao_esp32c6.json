@@ -1,0 +1,145 @@
+{
+ "board": "seeed_xiao_esp32c6",
+ "name": "Seeed Studio XIAO ESP32C6",
+ "image": "images/seeed_xiao_esp32c6.svg",
+ "width": 285,
+ "height": 356,
+ "credit": "Illustration drawn for esp32sim (not to exact scale); see the official photo and pinout on the Seeed wiki",
+ "wiki": "https://wiki.seeedstudio.com/xiao_esp32c6_getting_started/",
+ "pins": [
+  {
+   "label": "D0",
+   "x": 12,
+   "y": 92.0,
+   "side": "left",
+   "gpio": 0,
+   "alt": "A0"
+  },
+  {
+   "label": "D1",
+   "x": 12,
+   "y": 132.6,
+   "side": "left",
+   "gpio": 1,
+   "alt": "A1"
+  },
+  {
+   "label": "D2",
+   "x": 12,
+   "y": 173.3,
+   "side": "left",
+   "gpio": 2,
+   "alt": "A2"
+  },
+  {
+   "label": "D3",
+   "x": 12,
+   "y": 213.9,
+   "side": "left",
+   "gpio": 21,
+   "alt": "SS"
+  },
+  {
+   "label": "D4",
+   "x": 12,
+   "y": 254.6,
+   "side": "left",
+   "gpio": 22,
+   "alt": "SDA"
+  },
+  {
+   "label": "D5",
+   "x": 12,
+   "y": 295.2,
+   "side": "left",
+   "gpio": 23,
+   "alt": "SCL"
+  },
+  {
+   "label": "D6",
+   "x": 12,
+   "y": 335.8,
+   "side": "left",
+   "gpio": 16,
+   "alt": "TX"
+  },
+  {
+   "label": "5V",
+   "x": 273,
+   "y": 92.0,
+   "side": "right"
+  },
+  {
+   "label": "GND",
+   "x": 273,
+   "y": 132.6,
+   "side": "right"
+  },
+  {
+   "label": "3V3",
+   "x": 273,
+   "y": 173.3,
+   "side": "right"
+  },
+  {
+   "label": "D10",
+   "x": 273,
+   "y": 213.9,
+   "side": "right",
+   "gpio": 18,
+   "alt": "MOSI"
+  },
+  {
+   "label": "D9",
+   "x": 273,
+   "y": 254.6,
+   "side": "right",
+   "gpio": 20,
+   "alt": "MISO"
+  },
+  {
+   "label": "D8",
+   "x": 273,
+   "y": 295.2,
+   "side": "right",
+   "gpio": 19,
+   "alt": "SCK"
+  },
+  {
+   "label": "D7",
+   "x": 273,
+   "y": 335.8,
+   "side": "right",
+   "gpio": 17,
+   "alt": "RX"
+  }
+ ],
+ "parts": [
+  {
+   "type": "button",
+   "role": "reset",
+   "label": "RST",
+   "x": 38,
+   "y": 55,
+   "r": 16
+  },
+  {
+   "type": "button",
+   "role": "boot",
+   "label": "BOOT",
+   "x": 247,
+   "y": 55,
+   "r": 16
+  },
+  {
+   "type": "led",
+   "gpio": 15,
+   "active": 0,
+   "label": "User LED (yellow, lit when GPIO15 is low)",
+   "x": 92,
+   "y": 74,
+   "r": 6,
+   "color": "#ffc400"
+  }
+ ]
+}

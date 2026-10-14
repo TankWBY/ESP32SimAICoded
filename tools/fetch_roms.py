@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Download Espressif's mask-ROM ELF files into roms/.
 
-  python3 tools/fetch_roms.py            # ESP32-C3 only
+  python3 tools/fetch_roms.py            # ESP32-C3 and ESP32-C6
   python3 tools/fetch_roms.py --all      # every chip in the archive
 
 The files come from https://github.com/espressif/esp-rom-elfs (Apache-2.0).
@@ -18,7 +18,7 @@ import urllib.request
 VERSION = "20241011"
 URL = f"https://github.com/espressif/esp-rom-elfs/releases/download/{VERSION}/esp-rom-elfs-{VERSION}.tar.gz"
 SHA256 = "921f000164a421c7628fbfee55b173384aafaa51883adc65cd27bf9b0af9e9a9"
-DEFAULT = ["esp32c3_rev3_rom.elf"]
+DEFAULT = ["esp32c3_rev3_rom.elf", "esp32c6_rev0_rom.elf"]
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 

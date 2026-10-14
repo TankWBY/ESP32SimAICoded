@@ -6,6 +6,7 @@
 #include "core/rv32.hpp"
 #include "soc/esp32c3/crypto.hpp"
 #include "soc/esp32c3/intmatrix.hpp"
+#include "soc/esp32c6/peripherals.hpp"
 #include "util/inflate.hpp"
 #include "util/md5.hpp"
 
@@ -161,7 +162,7 @@ static void test_sha() {
 }
 
 static void test_intmatrix() {
-    c3::IntMatrix im("INTMATRIX");
+    c3::IntMatrix im("INTMATRIX", c3::irq::kSources, true);
     uint32_t lines = 0;
     im.on_lines = [&](uint32_t l) { lines = l; };
     im.write(c3::irq::SYSTIMER_TARGET0 * 4, 7);  // source -> CPU line 7
@@ -177,9 +178,62 @@ static void test_intmatrix() {
     CHECK(lines == 0);
 }
 
+// ESP32-C6: the PLIC reaches the line controller, map registers sit in the
+// separate matrix block, and the CPU clock follows PCR.
+static void test_c6_interrupts_and_clocks() {
+    c3::IntMatrix im("INTMTX", c6::irq::kSources, false);
+    c6::Plic plic("PLIC_MX", im);
+    uint32_t lines = 0;
+    im.on_lines = [&](uint32_t l) { lines = l; };
+    im.write(c6::irq::UART0 * 4, 9);  // UART0 -> CPU line 9
+    plic.write(0x10 + 9 * 4, 2);       // PLIC_MXINT9_PRI
+    plic.write(0x90, 1);               // PLIC_MXINT_THRESH
+    plic.write(0x00, 1u << 9);         // PLIC_MXINT_ENABLE
+    CHECK(plic.read(0x00) == (1u << 9));
+    im.set_source(c6::irq::UART0, true);
+    CHECK(lines == (1u << 9));
+    plic.write(0x90, 3);  // threshold above the line's priority masks it
+    CHECK(lines == 0);
+
+    c6::Pcr pcr("PCR");
+    pcr.reset();
+    CHECK(pcr.cpu_hz() == 40000000);   // XTAL after reset
+    pcr.write(0x110, 1u << 16);        // SOC_CLK_SEL = PLL (HS_DIV_NUM stays 2)
+    CHECK(pcr.cpu_hz() == 160000000);
+    pcr.write(0x118, 1u << 8);         // CPU_HS_DIV_NUM = 1
+    CHECK(pcr.cpu_hz() == 80000000);
+    CHECK((pcr.read(0x110) >> 24) == 40);  // CLK_XTAL_FREQ is read-only
+}
+
+// ESP32-C6 flash MMU: entries are written through ITEM_INDEX/ITEM_CONTENT and
+// the page size comes from MMU_POWER_CTRL.
+static void test_c6_mmu() {
+    c6::Spi0Mmu mmu("SPI0");
+    std::vector<int> changes;
+    mmu.on_change = [&](int i) { changes.push_back(i); };
+    mmu.reset();
+    CHECK(mmu.page_size() == 0x10000);
+    mmu.write(0x380, 5);                          // ITEM_INDEX
+    mmu.write(0x37C, c6::Spi0Mmu::kValid | 3);    // ITEM_CONTENT
+    CHECK(mmu.entry(5) == (c6::Spi0Mmu::kValid | 3));
+    CHECK(mmu.read(0x37C) == (c6::Spi0Mmu::kValid | 3));
+    mmu.write(0x384, 1u << 3);  // MMU_PAGE_SIZE = 1: 32 KiB
+    CHECK(mmu.page_size() == 0x8000);
+    CHECK(changes.size() == 3 && changes[0] == -1 && changes[1] == 5 && changes[2] == -1);
+    CHECK(mmu.read(0x170) >> 26 == 0x3F);  // AXI FIFOs report empty
+
+    c6::I2cAnaMst ana("I2C_ANA_MST");
+    ana.write(0x00, (1u << 24) | (0x5Au << 16) | (0x07u << 8) | 0x66);  // write BBPLL reg 7
+    ana.write(0x00, (0x07u << 8) | 0x66);                               // read it back
+    CHECK(((ana.read(0x00) >> 16) & 0xFF) == 0x5A);
+    CHECK(ana.read(0x18) & (1u << 24));  // BBPLL calibration done
+}
+
 int main() {
     test_sha();
     test_intmatrix();
+    test_c6_interrupts_and_clocks();
+    test_c6_mmu();
     test_base_isa();
     test_compressed_loop();
     test_trap_and_mret();

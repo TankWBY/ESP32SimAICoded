@@ -1,26 +1,17 @@
 // ESP32-C3 system-on-chip: RV32IMC core, internal SRAM, flash behind the
-// cache MMU, peripherals, and the (high-level emulated) mask ROM.
+// cache MMU, peripherals, and the mask ROM.
 #pragma once
-#include <deque>
 #include <memory>
-#include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
-#include "core/bus.hpp"
-#include "core/rv32.hpp"
-#include "soc/chip.hpp"
 #include "soc/esp32c3/crypto.hpp"
 #include "soc/esp32c3/gpio.hpp"
 #include "soc/esp32c3/intmatrix.hpp"
-#include "soc/esp32c3/timers.hpp"
 #include "soc/esp32c3/peripherals.hpp"
-#include "soc/spi_flash.hpp"
-#include "util/elf.hpp"
+#include "soc/esp32c3/timers.hpp"
+#include "soc/riscv_soc.hpp"
 
 namespace esp32sim {
-
-class Esp32c3Rom;
 
 namespace c3map {
 constexpr uint32_t IRAM_BASE = 0x40370000, IRAM_SIZE = 0x70000;  // SRAM0 at +0xC000, SRAM1 at +0x10000
@@ -38,81 +29,35 @@ constexpr uint32_t SYSTEM = 0x600C0000, INTMATRIX = 0x600C2000, IO_MUX = 0x60009
 constexpr uint32_t SYSTIMER = 0x60023000, USB_SERIAL_JTAG = 0x60043000;
 constexpr uint32_t MMU_TABLE = 0x600C5000, EXTMEM = 0x600C4000;
 constexpr uint32_t ROM_STACK_TOP = 0x3FCDE710;
+constexpr uint32_t kMmuPage = 0x10000;  // flash MMU page (64 KiB)
 constexpr uint32_t ROM_VECTOR_TABLE = 0x40001D00;  // _vector_table in esp32c3_rev3_rom.elf
 }  // namespace c3map
 
-class Esp32c3 : public Chip, public Bus {
+class Esp32c3 : public RiscvSoc {
 public:
     explicit Esp32c3(const ChipConfig& cfg);
     ~Esp32c3() override;
 
-    // Chip
     std::string name() const override { return "ESP32-C3"; }
-    void reset(BootMode mode) override;
-    void hold_in_reset() override;
-    void run_for(uint64_t cycles) override;
-    void serial_input(const uint8_t* data, size_t len) override;
-    uint32_t cpu_hz() const override { return cfg_.cpu_hz; }
-    void shutdown() override;
-    bool idle() const override { return state_ != State::Running; }
-    std::string status() const override;
-    uint64_t instructions() const override { return cpu_.instret; }
-
-    // Bus slow path
-    uint32_t mmio_read(uint32_t addr, int size) override;
-    void mmio_write(uint32_t addr, uint32_t value, int size) override;
-
-    // Used by the ROM emulation.
-    Rv32Cpu& cpu() { return cpu_; }
-    SpiFlash& flash() { return flash_; }
-    c3::Mmu& mmu() { return *mmu_; }
-    void console_write(const std::string& s);
-    void console_write(const uint8_t* data, size_t len);
-    void start_cpu(uint32_t entry);
-    void halt(const std::string& why);
-    void request_reset(BootMode mode, double delay_s = 0);
-    uint64_t next_deadline(uint64_t target) const;
-    uint32_t reset_reason() const;
-    bool has_real_rom() const { return have_rom_; }
-    std::string symbolize(uint32_t addr) const;
-    void add_symbols(const std::string& elf_path) override;
     std::vector<int> user_gpios() const override;
-    PinInfo pin_info(int gpio) const override { return gpio_->info(gpio); }
-    void set_pin_input(int gpio, int level) override { gpio_->set_external(gpio, level); }
-    uint64_t pins_version() const override { return gpio_->version(); }
-    std::string where() const override;
+    uint32_t reset_reason() const override { return rtc_cntl_->reset_reason; }
+    void set_mmu_entry(int index, uint32_t page) override { mmu_->set_entry(index, page); }
+
+protected:
+    void reset_peripherals(BootMode mode, uint32_t reason) override;
+    void set_reset_reason(uint32_t reason) override { rtc_cntl_->reset_reason = reason; }
+    c3::Uart& console_uart() override { return *uart0_; }
+    uint32_t rom_stack_top() const override { return c3map::ROM_STACK_TOP; }
+    void on_cpu_start() override;
+    void init_rom_state() override;
 
 private:
-    enum class State { InReset, Loader, Running, Halted };
-
-    void do_reset(BootMode mode, uint32_t reason);
-    void attach(uint32_t base, Peripheral* p, uint32_t size = 0x1000, bool timed = false);
-    struct PeriphSlot {
-        Peripheral* p = nullptr;
-        uint32_t base = 0;
-        bool timed = false;  // writes may move a timer deadline
-    };
-    PeriphSlot& slot_for(uint32_t addr);
-    PeriphSlot& create_generic_slot(uint32_t idx);
-    void flush_output();
-    void feed_uart_rx();
     void on_mmu_change(int index, uint32_t value);
-    void on_fatal_trap(uint32_t cause, uint32_t tval);
-    bool on_rom_call(Rv32Cpu& cpu);
+    void apply_clocks();
 
-    ChipConfig cfg_;
-    Rv32Cpu cpu_;
-    SpiFlash flash_;
     std::vector<uint8_t> sram_, rtc_fast_, rom_image_, drom_image_;
-    ElfFile rom_elf_;
-    bool have_rom_ = false;
-    std::unordered_map<uint32_t, uint32_t> extra_csrs_;
-    uint32_t mpccr_offset_ = 0;
-    std::vector<ElfFile> symbol_files_;
-    void load_rom_data();
-
     std::unique_ptr<c3::Uart> uart0_, uart1_;
-    std::unique_ptr<c3::Gpio> gpio_;
+    std::unique_ptr<c3::Gpio> gpio_dev_;
     std::unique_ptr<c3::Systimer> systimer_;
     std::unique_ptr<c3::Efuse> efuse_;
     std::unique_ptr<c3::RtcCntl> rtc_cntl_;
@@ -124,27 +69,7 @@ private:
     std::unique_ptr<c3::SystemReg> system_;
     std::unique_ptr<c3::IntMatrix> intmatrix_;
     std::unique_ptr<c3::Timg> timg0_, timg1_;
-    c3::Clocks clocks_;
-    std::vector<c3::TimedDevice*> timed_;
-    void apply_clocks();
-    void tick_timers();
-    uint64_t next_timer_event() const;
     std::unique_ptr<SpiMemController> spi1_;
-    std::vector<std::unique_ptr<Peripheral>> generic_;  // register files for not-yet-modelled blocks
-    PeriphSlot efuse_slot_;
-    PeriphSlot periph_map_[256];                        // 4 KiB granularity over 0x6000_0000..0x600F_FFFF
-    std::unordered_set<uint32_t> warned_pages_;
-
-    std::unique_ptr<Esp32c3Rom> rom_;
-    State state_ = State::InReset;
-    std::deque<uint8_t> host_rx_;
-    std::vector<uint8_t> tx_buf_;
-    bool reset_requested_ = false;
-    uint64_t reset_at_cycles_ = 0;
-    bool wdt_armed_ = false;
-    uint64_t wdt_at_cycles_ = 0;
-    BootMode requested_mode_ = BootMode::Flash;
-    uint64_t flash_save_at_ = 0;
 };
 
 }  // namespace esp32sim

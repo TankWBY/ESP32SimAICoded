@@ -1,6 +1,6 @@
 // Memory bus used by CPU cores.
 //
-// Address space is split into 64 KiB pages. A page either points straight at
+// Address space is split into 16 KiB pages (the smallest flash MMU page). A page either points straight at
 // host memory (RAM, memory-mapped flash) for fast access, or is null, in which
 // case the access goes through the slow MMIO path (peripherals).
 #pragma once
@@ -12,7 +12,7 @@ namespace esp32sim {
 
 class Bus {
 public:
-    static constexpr unsigned kPageBits = 16;
+    static constexpr unsigned kPageBits = 14;
     static constexpr uint32_t kPageSize = 1u << kPageBits;
     static constexpr uint32_t kPageMask = kPageSize - 1;
 
