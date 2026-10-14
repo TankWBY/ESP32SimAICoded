@@ -15,6 +15,7 @@
 #include "soc/esp32c3/peripherals.hpp"
 #include "soc/esp32c3/timers.hpp"
 #include "soc/esp_rom.hpp"
+#include "soc/i2c.hpp"
 #include "soc/spi_flash.hpp"
 #include "util/elf.hpp"
 
@@ -63,6 +64,7 @@ protected:
     virtual void reset_peripherals(BootMode mode, uint32_t reason) = 0;
     virtual void set_reset_reason(uint32_t reason) = 0;
     virtual c3::Uart& console_uart() = 0;
+    virtual c3::UsbSerialJtag* usb_serial() { return nullptr; }  // host input with --usb-console
     virtual uint32_t rom_stack_top() const = 0;
     virtual void on_cpu_start() {}       // state the real ROM leaves behind
     virtual void init_rom_state() {}     // after the ROM's .data/.bss are loaded
@@ -76,6 +78,7 @@ protected:
     void load_rom(uint32_t base, std::vector<uint8_t>& image);
     void finish_setup(RomProfile profile, uint32_t rom_base, uint32_t rom_size);
     void arm_rtc_wdt(double delay_s);  // < 0 disarms
+    void attach_i2c_devices(I2cController& bus);  // the ChipConfig's virtual devices
     void apply_cpu_clock(uint32_t hz);
     uint32_t rom_symbol(const std::string& name) const;
     void write_rom_word(const std::string& symbol, uint32_t value, int size = 4);
@@ -93,6 +96,7 @@ protected:
     std::unique_ptr<EspRom> rom_;
     std::vector<uint8_t> tx_buf_;
     bool reset_requested_ = false;
+    std::vector<std::unique_ptr<I2cDevice>> i2c_devices_;
 
 private:
     struct PeriphSlot {

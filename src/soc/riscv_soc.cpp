@@ -246,6 +246,20 @@ void RiscvSoc::request_reset(BootMode mode, double delay_s) {
     if (delay_s <= 0) cpu_.request_stop();  // end the current run() slice promptly
 }
 
+void RiscvSoc::attach_i2c_devices(I2cController& bus) {
+    for (const std::string& spec : cfg_.i2c_devices) {
+        int addr = 0;
+        std::string err;
+        if (auto dev = make_i2c_device(spec, &addr, &err)) {
+            bus.attach(addr, dev.get());
+            i2c_devices_.push_back(std::move(dev));
+            LOGI("i2c: %s on %s", spec.c_str(), bus.name().c_str());
+        } else {
+            LOGE("i2c: %s", err.c_str());
+        }
+    }
+}
+
 void RiscvSoc::arm_rtc_wdt(double delay_s) {
     wdt_armed_ = delay_s >= 0;
     if (wdt_armed_) wdt_at_cycles_ = cpu_.cycles + uint64_t(delay_s * cfg_.cpu_hz);
@@ -311,6 +325,10 @@ void RiscvSoc::flush_output() {
 }
 
 void RiscvSoc::feed_uart_rx() {
+    if (c3::UsbSerialJtag* usb = cfg_.usb_console ? usb_serial() : nullptr) {
+        for (size_t n = usb->rx_space(); n && !host_rx_.empty(); --n, host_rx_.pop_front()) usb->push_rx(host_rx_.front());
+        return;
+    }
     c3::Uart& u = console_uart();
     size_t n = u.rx_space();
     while (n-- && !host_rx_.empty()) {

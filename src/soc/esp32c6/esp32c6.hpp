@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "soc/esp32c3/crypto.hpp"
+#include "soc/esp32c3/dma.hpp"
 #include "soc/esp32c3/gpio.hpp"
 #include "soc/esp32c3/intmatrix.hpp"
 #include "soc/esp32c3/peripherals.hpp"
@@ -23,7 +24,11 @@ constexpr uint32_t ROM_BASE = 0x40000000, ROM_SIZE = 0x50000;
 constexpr uint32_t PERIPH_BASE = 0x60000000, PERIPH_SIZE = 0xD0000;
 constexpr uint32_t UART0 = 0x60000000, UART1 = 0x60001000, SPI0 = 0x60002000, SPI1 = 0x60003000;
 constexpr uint32_t TIMG0 = 0x60008000, TIMG1 = 0x60009000, SYSTIMER = 0x6000A000;
-constexpr uint32_t USB_SERIAL_JTAG = 0x6000F000, INTMTX = 0x60010000, SHA = 0x60089000;
+constexpr uint32_t SPI2 = 0x60081000;
+constexpr uint32_t I2C0 = 0x60004000;
+constexpr uint32_t LEDC = 0x60007000;
+constexpr uint32_t GDMA = 0x60080000, AES = 0x60088000;
+constexpr uint32_t APB_SARADC = 0x6000E000, USB_SERIAL_JTAG = 0x6000F000, INTMTX = 0x60010000, SHA = 0x60089000;
 constexpr uint32_t IO_MUX = 0x60090000, GPIO = 0x60091000, PCR = 0x60096000, I2C_ANA_MST = 0x600AF800;
 constexpr uint32_t LP_CLKRST = 0x600B0400, EFUSE = 0x600B0800, LP_TIMER = 0x600B0C00, LP_AON = 0x600B1000;
 constexpr uint32_t LP_WDT = 0x600B1C00, LPPERI = 0x600B2800, INTPRI = 0x600C5000, EXTMEM = 0x600C8000;
@@ -46,6 +51,7 @@ protected:
     void reset_peripherals(BootMode mode, uint32_t reason) override;
     void set_reset_reason(uint32_t reason) override { lp_clkrst_->reset_reason = reason; }
     c3::Uart& console_uart() override { return *uart0_; }
+    c3::UsbSerialJtag* usb_serial() override { return usb_jtag_.get(); }
     uint32_t rom_stack_top() const override { return c6map::ROM_STACK_TOP; }
     void on_cpu_start() override;
     void init_rom_state() override;
@@ -66,6 +72,12 @@ private:
     std::unique_ptr<c3::UsbSerialJtag> usb_jtag_;
     std::unique_ptr<c3::Syscon> lpperi_;
     std::unique_ptr<c3::Sha> sha_;
+    std::unique_ptr<c3::SarAdc> adc_;
+    std::unique_ptr<c3::Ledc> ledc_;
+    std::unique_ptr<I2cController> i2c0_;
+    std::unique_ptr<c3::GpSpi> spi2_;
+    std::unique_ptr<c3::Aes> aes_;
+    std::unique_ptr<c3::Gdma> gdma_;
     std::unique_ptr<SpiMemController> spi1_;
     std::unique_ptr<c6::Spi0Mmu> spi0_;
     std::unique_ptr<c6::Pcr> pcr_;

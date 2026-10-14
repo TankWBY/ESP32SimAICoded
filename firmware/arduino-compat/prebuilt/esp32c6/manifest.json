@@ -1,0 +1,13 @@
+{
+  "arduino_esp32": "3.3.12",
+  "builds": {
+    "uart": {
+      "image": "arduino_compat.bin",
+      "fqbn": "esp32:esp32:esp32c6"
+    },
+    "usbcdc": {
+      "image": "arduino_compat_usbcdc.bin",
+      "fqbn": "esp32:esp32:esp32c6:CDCOnBoot=cdc"
+    }
+  }
+}

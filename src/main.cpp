@@ -19,6 +19,7 @@
 #include "host/serial_host.hpp"
 #include "host/ui_server.hpp"
 #include "soc/chip.hpp"
+#include "soc/i2c.hpp"
 #include "util/log.hpp"
 
 using namespace esp32sim;
@@ -55,6 +56,7 @@ struct Options {
     double bench = 0;    // emulated seconds to run flat out, then exit
     int ui_port = 8080;  // 0 = no web UI
     bool open_ui = false;
+    std::vector<std::string> i2c_devices;
 };
 
 void usage() {
@@ -80,6 +82,9 @@ void usage() {
         "  --rom FILE           Espressif mask-ROM ELF (tools/fetch_roms.py); needed for ESP-IDF/Arduino apps\n"
         "                       (default: roms/<chip>_revN_rom.elf next to the executable, if present)\n"
         "  --no-rom             ignore any ROM image: built-in ROM emulation only (bare-metal firmware)\n"
+        "\nPeripherals:\n"
+        "  --i2c-dev KIND@ADDR  put a virtual device on the I2C bus (repeatable); KIND: eeprom\n"
+        "                       (256-byte 24C02-style EEPROM), e.g. --i2c-dev eeprom@0x50\n"
         "\n"
         "Serial endpoints (any combination; default --rfc2217 5555):\n"
         "  --rfc2217 PORT       RFC 2217 server: rfc2217://localhost:PORT (DTR/RTS reset works)\n"
@@ -98,7 +103,7 @@ void usage() {
         "  --boot flash|download  strap state at power-on (default flash)\n"
         "  --echo               also print chip serial output to stdout\n"
         "  --no-gpio-log        do not log GPIO output changes\n"
-        "  --usb-console        serial endpoints show the USB-Serial-JTAG console instead of UART0 output\n"
+        "  --usb-console        serial endpoints connect to the USB-Serial-JTAG CDC port instead of UART0\n"
         "  --speed X            emulated speed relative to real time (default 1, 0 = max)\n"
         "  --no-console         do not read control commands from stdin\n"
         "  --bench SECONDS      run SECONDS of emulated time as fast as possible, report speed, exit\n"
@@ -157,6 +162,15 @@ bool parse_args(int argc, char** argv, Options& o) {
         else if (a == "--rom") o.rom = next("a ROM ELF file");
         else if (a == "--no-rom") o.no_rom = true;
         else if (a == "--elf") o.elfs.push_back(next("an ELF file"));
+        else if (a == "--i2c-dev") {
+            std::string spec = next("a device, e.g. eeprom@0x50"), err;
+            int addr;
+            if (!make_i2c_device(spec, &addr, &err)) {
+                std::fprintf(stderr, "error: %s\n", err.c_str());
+                return false;
+            }
+            o.i2c_devices.push_back(spec);
+        }
         else if (a == "--speed") o.speed = std::atof(next("a factor").c_str());
         else if (a == "--bench") o.bench = std::atof(next("seconds").c_str());
         else if (a == "--boot") {
@@ -386,6 +400,7 @@ int main(int argc, char** argv) {
         }
         cfg.trace_gpio = opt.gpio_log;
         cfg.usb_console = opt.usb_console;
+        cfg.i2c_devices = opt.i2c_devices;
         cfg.rom_path = opt.rom;
         if (cfg.rom_path.empty() && !opt.no_rom) {
             std::string name = cfg.variant + (cfg.variant == "esp32c6" ? "_rev0_rom.elf" : "_rev3_rom.elf");

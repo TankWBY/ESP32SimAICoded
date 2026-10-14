@@ -7,8 +7,8 @@ namespace esp32sim {
 
 const std::vector<ChipInfo>& chip_catalog() {
     static const std::vector<ChipInfo> catalog = {
-        {"esp32c3", "ESP32-C3", "RISC-V RV32IMC", true, "runs ESP-IDF apps with the ROM image: CPU, interrupts, UART, SPI flash, MMU, timers, watchdogs, SHA"},
-        {"esp32c6", "ESP32-C6", "RISC-V RV32IMAC", true, "runs ESP-IDF apps with the ROM image: CPU, interrupts (PLIC), UART, SPI flash, MMU, timers, watchdogs, SHA; no radios or LP core"},
+        {"esp32c3", "ESP32-C3", "RISC-V RV32IMC", true, "runs ESP-IDF and Arduino apps with the ROM image: CPU, interrupts, UART, SPI flash, MMU, timers, watchdogs, GPIO, SHA, AES, GDMA, SPI2, I2C, LEDC, ADC, USB-Serial-JTAG"},
+        {"esp32c6", "ESP32-C6", "RISC-V RV32IMAC", true, "runs ESP-IDF and Arduino apps with the ROM image: CPU, interrupts (PLIC), UART, SPI flash, MMU, timers, watchdogs, GPIO, SHA, AES, GDMA, SPI2, I2C, LEDC, ADC, USB-Serial-JTAG; no radios or LP core"},
         {"esp32h2", "ESP32-H2", "RISC-V RV32IMAC", false, "planned"},
         {"esp32", "ESP32", "Xtensa LX6 (dual core)", false, "planned: needs Xtensa core"},
         {"esp32s2", "ESP32-S2", "Xtensa LX7", false, "planned: needs Xtensa core"},

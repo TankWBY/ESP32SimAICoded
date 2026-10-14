@@ -66,6 +66,11 @@ public:
     IrqOut irq;
     // Watchdog reset; `system` is false for a CPU-only reset.
     std::function<void(bool system)> on_wdt_reset;
+    // Clock source of the timer and of the watchdog, where it is picked
+    // outside the block (C6: PCR). Unset: APB, or XTAL when USE_XTAL is set.
+    std::function<double()> timer_clock_hz, wdt_clock_hz;
+    // Call before the timer's clock source changes, to keep its count.
+    void clock_changing() { t0_settle(); }
 
 private:
     // Timer 0

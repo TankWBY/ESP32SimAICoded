@@ -31,8 +31,11 @@ struct GpioPads {
     const SignalName* out_signals;
     size_t out_signal_count;
     uint32_t date;                // GPIO_DATE_REG
+    int in_sel_bits;              // width of the IN_SEL pad field: 5 (C3) or 6 (C6); SIG_IN_SEL follows INV
 };
 extern const GpioPads kEsp32c3Pads;
+// GPIO matrix signal numbers shared by the C3 and C6 (gpio_sig_map.h).
+constexpr int kSigU0Rxd = 6, kSigU1Txd = 9, kSigU1Rxd = 9, kSigFspiq = 64, kSigFspid = 65;
 extern const SignalName kOutSignals[];
 extern const size_t kOutSignalCount;
 
@@ -49,6 +52,10 @@ public:
     void set_external(int pin, int level);  // -1 releases the pad
     PinInfo info(int pin) const;
     uint64_t version() const { return version_; }
+    // True when peripheral output signal `out_sig` reaches input signal
+    // `in_sig` through a pad of the GPIO matrix (a loopback on the chip, or
+    // two peripherals sharing a pad).
+    bool signal_routed(int out_sig, int in_sig) const;
 
     bool trace = true;
     std::function<void(bool level)> irq;  // GPIO interrupt source (CPU)

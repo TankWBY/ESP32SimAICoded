@@ -28,6 +28,6 @@ uint32_t default_mux(int pin) {
 }  // namespace
 
 const c3::GpioPads kPads = {31, kFunc0, kFunc2, default_mux, 0x7F000000 /* GPIO24-30 */, 12, 13, 16,
-                            kOutSignals, kOutSignalCount, 0x2201120};
+                            kOutSignals, kOutSignalCount, 0x2201120, 6};
 
 }  // namespace esp32sim::c6

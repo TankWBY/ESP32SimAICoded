@@ -27,6 +27,7 @@ add_library(esp32sim_core STATIC
   src/soc/esp32c3/esp32c3.cpp
   src/soc/esp32c3/peripherals.cpp
   src/soc/esp32c3/crypto.cpp
+  src/soc/esp32c3/dma.cpp
   src/soc/esp32c3/gpio.cpp
   src/soc/esp32c3/gpio_signals.cpp
   src/soc/esp32c3/intmatrix.cpp
@@ -36,6 +37,7 @@ add_library(esp32sim_core STATIC
   src/soc/esp32c6/gpio_pads.cpp
   src/soc/esp32c6/gpio_signals.cpp
   src/soc/esp_rom.cpp
+  src/soc/i2c.cpp
   src/soc/riscv_soc.cpp
   src/soc/spi_flash.cpp
   src/soc/chip.cpp
@@ -123,4 +125,27 @@ if(Python3_FOUND)
                      --emulator $<TARGET_FILE:esp32sim> --chip esp32c6)
     set_tests_properties(gpio_ui gpio_ui_c6 PROPERTIES SKIP_RETURN_CODE 77)
   endif()
+
+  # Arduino-ESP32 compatibility suite (firmware/arduino-compat): one test per
+  # chip and sketch build found in prebuilt/, plus a check that every chip
+  # the emulator reports as emulated has a build, so a new chip can't skip it.
+  add_test(NAME arduino_coverage
+           COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/arduino_compat.py
+                   --emulator $<TARGET_FILE:esp32sim> --coverage)
+  file(GLOB ARDUINO_IMAGES CONFIGURE_DEPENDS
+       ${CMAKE_CURRENT_SOURCE_DIR}/firmware/arduino-compat/prebuilt/*/arduino_compat*.bin)
+  foreach(image IN LISTS ARDUINO_IMAGES)
+    get_filename_component(chip_dir ${image} DIRECTORY)
+    get_filename_component(chip ${chip_dir} NAME)
+    get_filename_component(image_name ${image} NAME_WE)
+    if(image_name STREQUAL "arduino_compat")
+      set(variant uart)
+    else()
+      string(REPLACE "arduino_compat_" "" variant ${image_name})
+    endif()
+    add_test(NAME arduino_${chip}_${variant}
+             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/arduino_compat.py
+                     --emulator $<TARGET_FILE:esp32sim> --chip ${chip} --variant ${variant})
+    set_tests_properties(arduino_${chip}_${variant} PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 600)
+  endforeach()
 endif()

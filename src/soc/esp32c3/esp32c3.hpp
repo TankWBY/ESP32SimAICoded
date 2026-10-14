@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "soc/esp32c3/crypto.hpp"
+#include "soc/esp32c3/dma.hpp"
 #include "soc/esp32c3/gpio.hpp"
 #include "soc/esp32c3/intmatrix.hpp"
 #include "soc/esp32c3/peripherals.hpp"
@@ -27,7 +28,11 @@ constexpr uint32_t RTC_CNTL = 0x60008000, EFUSE = 0x60008800, UART1 = 0x60010000
 constexpr uint32_t SYSCON = 0x60026000, SHA = 0x6003B000, TIMG0 = 0x6001F000, TIMG1 = 0x60020000;
 constexpr uint32_t SYSTEM = 0x600C0000, INTMATRIX = 0x600C2000, IO_MUX = 0x60009000;
 constexpr uint32_t SYSTIMER = 0x60023000, USB_SERIAL_JTAG = 0x60043000;
-constexpr uint32_t MMU_TABLE = 0x600C5000, EXTMEM = 0x600C4000;
+constexpr uint32_t MMU_TABLE = 0x600C5000, EXTMEM = 0x600C4000, APB_SARADC = 0x60040000;
+constexpr uint32_t SPI2 = 0x60024000;
+constexpr uint32_t I2C0 = 0x60013000;
+constexpr uint32_t LEDC = 0x60019000;
+constexpr uint32_t AES = 0x6003A000, GDMA = 0x6003F000;
 constexpr uint32_t ROM_STACK_TOP = 0x3FCDE710;
 constexpr uint32_t kMmuPage = 0x10000;  // flash MMU page (64 KiB)
 constexpr uint32_t ROM_VECTOR_TABLE = 0x40001D00;  // _vector_table in esp32c3_rev3_rom.elf
@@ -47,6 +52,7 @@ protected:
     void reset_peripherals(BootMode mode, uint32_t reason) override;
     void set_reset_reason(uint32_t reason) override { rtc_cntl_->reset_reason = reason; }
     c3::Uart& console_uart() override { return *uart0_; }
+    c3::UsbSerialJtag* usb_serial() override { return usb_jtag_.get(); }
     uint32_t rom_stack_top() const override { return c3map::ROM_STACK_TOP; }
     void on_cpu_start() override;
     void init_rom_state() override;
@@ -66,6 +72,12 @@ private:
     std::unique_ptr<c3::Extmem> extmem_;
     std::unique_ptr<c3::Syscon> syscon_;
     std::unique_ptr<c3::Sha> sha_;
+    std::unique_ptr<c3::SarAdc> adc_;
+    std::unique_ptr<c3::Ledc> ledc_;
+    std::unique_ptr<I2cController> i2c0_;
+    std::unique_ptr<c3::GpSpi> spi2_;
+    std::unique_ptr<c3::Aes> aes_;
+    std::unique_ptr<c3::Gdma> gdma_;
     std::unique_ptr<c3::SystemReg> system_;
     std::unique_ptr<c3::IntMatrix> intmatrix_;
     std::unique_ptr<c3::Timg> timg0_, timg1_;

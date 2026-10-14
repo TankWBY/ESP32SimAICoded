@@ -174,7 +174,7 @@ double Timg::t0_rate() const {
     if (!(cfg & T0_EN)) return 0;
     uint32_t div = (cfg >> 13) & 0xFFFF;
     if (div == 0) div = 65536;
-    double src = (cfg & T0_USE_XTAL) ? Clocks::kXtalHz : clk_.apb_hz;
+    double src = timer_clock_hz ? timer_clock_hz() : (cfg & T0_USE_XTAL) ? Clocks::kXtalHz : clk_.apb_hz;
     return src / div / clk_.master_hz;
 }
 
@@ -197,7 +197,7 @@ uint64_t Timg::wdt_stage_end() const {
     if (!(cfg & WDT_EN)) return kNever;
     uint32_t prescale = RegisterFile::read_const(WDTCONFIG1) >> 16;
     if (prescale == 0) prescale = 65536;
-    double src = (cfg & WDT_USE_XTAL) ? Clocks::kXtalHz : clk_.apb_hz;
+    double src = wdt_clock_hz ? wdt_clock_hz() : (cfg & WDT_USE_XTAL) ? Clocks::kXtalHz : clk_.apb_hz;
     double hold = RegisterFile::read_const(WDTCONFIG2 + 4 * uint32_t(wdt_stage_));
     return wdt_start_ + uint64_t(hold * prescale / src * clk_.master_hz);
 }
