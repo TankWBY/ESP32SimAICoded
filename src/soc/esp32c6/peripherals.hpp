@@ -15,7 +15,8 @@ namespace esp32sim::c6 {
 
 namespace irq {
 constexpr int LP_WDT = 18, FROM_CPU0 = 22, GPIO = 30, UART0 = 43, UART1 = 44, USB_SERIAL_JTAG = 48;
-constexpr int TG0_T0 = 51, TG0_WDT = 53, TG1_T0 = 54, TG1_WDT = 56, SYSTIMER_TARGET0 = 57, SHA = 78;
+constexpr int LEDC = 45, I2C_EXT0 = 50, TG0_T0 = 51, TG0_WDT = 53, TG1_T0 = 54, TG1_WDT = 56, SYSTIMER_TARGET0 = 57;
+constexpr int APB_ADC = 60, DMA_IN_CH0 = 66, DMA_OUT_CH0 = 69, GSPI2 = 72, AES = 73, SHA = 74;
 constexpr int kSources = 81;
 }  // namespace irq
 
@@ -35,7 +36,10 @@ public:
     void write(uint32_t off, uint32_t value) override;
     void reset() override;
     uint32_t cpu_hz() const;
+    // Clock of timer group `group`'s timer (or watchdog): XTAL, PLL_F80M or RC_FAST.
+    uint32_t timg_hz(int group, bool wdt) const;
     std::function<void()> on_clock_change;
+    std::function<void(int group)> before_timg_clock_change;
 };
 
 // LP clock/reset block: reports the reset cause.

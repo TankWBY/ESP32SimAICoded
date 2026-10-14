@@ -43,7 +43,7 @@ const char* const kIntTypes[8] = {"", "rising", "falling", "any edge", "low leve
 }  // namespace
 
 const GpioPads kEsp32c3Pads = {22, kC3Func0, kC3Func2, c3_default_mux, 0x3F000 /* GPIO12-17 */, 18, 19, 21,
-                               kOutSignals, kOutSignalCount, 0x2006130};
+                               kOutSignals, kOutSignalCount, 0x2006130, 5};
 
 Gpio::Gpio(std::string name, const GpioPads& pads)
     : Peripheral(std::move(name)), pads_(pads), pins_(pads.pins),
@@ -113,6 +113,18 @@ int Gpio::pad_level(int pin) const {
     if (mux & FUN_WPU) return 1;
     if (mux & FUN_WPD) return 0;
     return -1;
+}
+
+bool Gpio::signal_routed(int out_sig, int in_sig) const {
+    if (in_sig < 0 || size_t(in_sig) >= in_sel_.size()) return false;
+    const uint32_t cfg = in_sel_[size_t(in_sig)];
+    const int bits = pads_.in_sel_bits;
+    if (!((cfg >> (bits + 1)) & 1)) return false;  // SIG_IN_SEL: 0 = IO_MUX direct input
+    const int pad = int(cfg & ((1u << bits) - 1));
+    if (pad >= pins_ || !via_matrix(pad)) return false;
+    const uint32_t out = out_sel_[size_t(pad)];
+    const bool oe = (out & (1u << 9)) ? ((enable_ >> pad) & 1) : true;
+    return int(out & 0xFF) == out_sig && oe && (mux_[size_t(pad)] & FUN_IE);
 }
 
 PinInfo Gpio::info(int pin) const {
@@ -203,7 +215,7 @@ void Gpio::write(uint32_t off, uint32_t value) {
     } else if (off >= FUNC0_OUT_SEL && off < FUNC0_OUT_SEL + 4 * pins_) {
         out_sel_[(off - FUNC0_OUT_SEL) / 4] = value & 0x7FF;
     } else if (off >= FUNC0_IN_SEL && off < FUNC0_IN_SEL + 4 * 128) {
-        in_sel_[(off - FUNC0_IN_SEL) / 4] = value & 0x7F;
+        in_sel_[(off - FUNC0_IN_SEL) / 4] = value & 0xFF;
         return;  // input routing has no visible effect yet
     } else {
         switch (off) {

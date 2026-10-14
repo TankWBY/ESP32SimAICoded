@@ -21,9 +21,12 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - run: cmake -S . -B build
       - run: cmake --build build --config Release -j
-      - run: ctest --test-dir build -C Release -R unit --output-on-failure
+      - run: ctest --test-dir build -C Release -R "unit|arduino" --output-on-failure
       - uses: actions/upload-artifact@v4
         with:
           name: esp32sim-windows

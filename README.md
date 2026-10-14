@@ -30,15 +30,21 @@ and use the serial console.
 | Flash | SPI NOR model (JEDEC ID, read, page program, sector/block/chip erase, status regs), stored in a file |
 | Cache MMU | C3: 128 × 64 KiB pages, IROM `0x4200_0000` and DROM `0x3C00_0000`. C6: 256 pages of 64/32/16 KiB at `0x4200_0000`. Code and data run in place from flash |
 | SPI1 controller | User commands plus the fixed hardware commands, which is how esptool reads the flash ID |
-| UART0/1 | RX/TX FIFOs, status, RX interrupts; UART0 is bridged to the host serial endpoints |
+| UART0/1 | RX/TX FIFOs, status, RX interrupts, internal loopback; UART0 is bridged to the host serial endpoints, and UART1 TX reaches a UART RX routed to the same pad |
 | SYSTIMER | 16 MHz units 0/1, three comparators (one-shot and periodic) with interrupts: the FreeRTOS tick and esp_timer |
 | Timer groups | TIMG0/1 timer with alarm/auto-reload, main watchdogs (interrupt and reset stages), RTC clock calibration |
-| SHA | SHA-1/224/256 accelerator (used by the bootloader to verify app images) |
+| SHA | SHA-1/224/256 accelerator, typical and DMA mode (used by the bootloader to verify app images) |
+| AES | AES-128/256 in typical mode and DMA mode (ECB, CBC, OFB, CTR, CFB8, CFB128; not GCM) |
+| GDMA | Linked-list DMA channels feeding SPI2, AES, SHA and the ADC: descriptors, EOF, interrupts |
+| SPI2 | GP-SPI master transactions from W0-W15 or GDMA; MISO reads idle high, or loops back from MOSI when FSPID is routed to FSPIQ through a pad |
+| I2C0 | Master command list (start, write, read, stop) at transaction level, NACK for absent devices; virtual devices with `--i2c-dev`, e.g. a 24C02 EEPROM (`eeprom@0x50`) |
+| LEDC | Timers, channels and duty updates as software sees them, with their interrupts (C3 fades land on the final duty; C6 gamma-RAM fades are not modelled) |
+| ADC | One-shot SAR ADC conversions read the pad level (0 or 4095), including IDF's self-calibration (C3 ADC1 ch0-4 / ADC2 ch0, C6 ADC1 ch0-6) |
 | RNG | Hardware random number register |
 | GPIO | GPIO matrix and IO_MUX: outputs, inputs, pulls, open drain, peripheral routing, edge/level interrupts, strap pins; pads can be driven from the UI or console |
 | eFuse | MAC address and chip revision (C3 v0.4, C6 v0.1) |
 | RTC / LP domain | Software system and CPU reset, RTC watchdog with feed/disable, RTC timer, reset reason (C3 RTC_CNTL; C6 LP_AON, LP_WDT, LP_TIMER, LP_CLKRST) |
-| USB-Serial-JTAG | Console output is forwarded to the same serial endpoints |
+| USB-Serial-JTAG | CDC-ACM both ways with an attached host (SOF frames, IN/OUT packet interrupts); output is forwarded to the serial endpoints, and with `--usb-console` host input goes to it instead of UART0 |
 | ROM boot | Reset banner, flash boot of an ESP image (RAM segments + MMU mapping), ROM "direct boot", partition table lookup |
 | ROM download mode | The esptool serial protocol: sync, register read/write, RAM download, flash write (plain and **compressed**), MD5, flash read, security info |
 | Reset lines | DTR/RTS over RFC 2217 drive an emulated dev-board auto-reset circuit, so esptool resets into download mode by itself |
@@ -52,21 +58,27 @@ bootloader, prints its output and restarts itself in a loop, on both chips
 (`tests/idf_hello.py --chip esp32c3|esp32c6`). A bare-metal demo also runs
 without any ROM image (ESP32-C3).
 
+**Arduino-ESP32 3.3** runs on both chips: a self-checking sketch exercises 27
+areas of the Arduino API (Serial, GPIO and interrupts, timers, FreeRTOS,
+Preferences, LittleFS, crypto, LEDC, Wire, SPI, analogRead, restart) and every
+test passes, with `Serial` on UART0 and on USB CDC. See
+[Arduino compatibility suite](#arduino-compatibility-suite).
+
 ## Not there yet (roadmap)
 
-1. **More peripherals.** I2C, SPI2, LEDC, RMT, ADC, GDMA and
-   the USB-Serial-JTAG receive side are register stubs, so firmware that
-   relies on them will not behave yet. Wi-Fi and Bluetooth are out of scope
-   for now: the radio would need a much larger model.
-2. **Arduino.** Arduino-ESP32 is built on ESP-IDF, so it should get as far as
-   IDF does, but it has not been tried yet.
-3. **More chips.** The ESP32-H2 is close to the C6 and should come next. The
+1. **More peripherals.** RMT, I2S, TWAI, the C6's PARLIO, and continuous
+   (DMA) ADC are register stubs, so firmware that relies on them will not
+   behave yet. Peripherals have no pin-level timing: an SPI or I2C transfer
+   completes at once, and PWM is not visible as a waveform on the pin. Wi-Fi
+   and Bluetooth are out of scope for now: the radio would need a much larger
+   model.
+2. **More chips.** The ESP32-H2 is close to the C6 and should come next. The
    ESP32, S2 and S3 need an Xtensa LX6/LX7 core.
-4. **Speed.** The emulator runs at about 110-150 MIPS here, roughly 70-95% of
+3. **Speed.** The emulator runs at about 110-150 MIPS here, roughly 70-95% of
    a real 160 MHz C3. Timers follow emulated cycles, so firmware timing stays
    correct even when wall-clock speed is lower, and an idle FreeRTOS app
    (waiting in `wfi`) costs almost no host CPU.
-5. **Windows testing.** The Windows build cross-compiles with MinGW-w64, and
+4. **Windows testing.** The Windows build cross-compiles with MinGW-w64, and
    `--com` uses the standard Win32 serial API, but neither has been run on
    Windows yet, and MSVC has not been tried.
 
@@ -119,6 +131,11 @@ Windows or built with MSVC yet.
 * While it runs, type `r` + Enter to reset and run, `d` + Enter to reset into
   download mode, `pins` to list GPIO states, `p 4 0` / `p 4 1` / `p 4 z` to
   drive GPIO4 low, high or release it, `q` to quit.
+* `--usb-console` connects the serial endpoints to the chip's USB-Serial-JTAG
+  CDC port instead of UART0, for firmware whose console is USB (Arduino's
+  "USB CDC On Boot", the default on boards such as the Seeed XIAO).
+* `--i2c-dev eeprom@0x50` puts a virtual 256-byte EEPROM on the I2C bus at
+  address 0x50 (repeatable).
 * `--echo` mirrors the chip's serial output to the terminal. `-v` shows debug
   logs, including emulation speed.
 
@@ -232,6 +249,22 @@ partition table + app path, with the 2nd-stage bootloader step emulated. To
 rebuild: `python3 firmware/hello/build.py`
 (needs clang with the RISC-V target, ld.lld and esptool).
 
+## Arduino compatibility suite
+
+`firmware/arduino-compat` is an Arduino sketch that checks the Arduino-ESP32
+API on the emulator, one test per area, and `tests/arduino_compat.py` runs it
+on every emulated chip (`ctest -R arduino`):
+
+```sh
+python3 tests/arduino_compat.py                   # every emulated chip, every build
+python3 tests/arduino_compat.py --chip esp32c6 --variant usbcdc -v
+```
+
+A chip that `--list-chips` reports as emulated without a build of the sketch
+fails the `arduino_coverage` test, so a new chip gets the suite as soon as it
+is added: build it with `python3 tools/build_arduino_compat.py --chip <chip>`
+and ctest picks the images up. See `firmware/arduino-compat/README.md`.
+
 ## Boards
 
 ```sh
@@ -257,10 +290,10 @@ ui/              the web UI page (embedded into the executable at build time)
 boards/layouts/  board pictures' pin positions for the UI; boards/images/ the pictures
 src/boards/      PlatformIO board catalogue
 src/util/        zlib inflate, MD5, JSON and ELF readers, logging
-tests/           unit tests (C++), end-to-end esptool, ESP-IDF and web UI tests (Python)
-firmware/        ESP-IDF hello_world and GPIO demo (prebuilt), bare-metal demo firmware
+tests/           unit tests (C++), end-to-end esptool, ESP-IDF, Arduino and web UI tests (Python)
+firmware/        ESP-IDF hello_world and GPIO demo, Arduino compatibility sketch (prebuilt), bare-metal demo
 roms/            Espressif mask-ROM images (Apache-2.0)
-tools/           board list updater, ROM downloader
+tools/           board list updater, ROM downloader, Arduino sketch builder
 ```
 
 New chip variants implement `esp32sim::Chip` (`src/soc/chip.hpp`) and register

@@ -4,6 +4,7 @@
 
 namespace esp32sim {
 
+using c3::kSigU0Rxd, c3::kSigU1Txd, c3::kSigU1Rxd, c3::kSigFspiq, c3::kSigFspid;
 using namespace c3map;
 
 Esp32c3::Esp32c3(const ChipConfig& cfg)
@@ -39,9 +40,31 @@ Esp32c3::Esp32c3(const ChipConfig& cfg)
     syscon_ = std::make_unique<c3::Syscon>("SYSCON", 0xB0);
     sha_ = std::make_unique<c3::Sha>("SHA");
     spi1_ = std::make_unique<SpiMemController>("SPI1", flash_);
+    adc_ = std::make_unique<c3::SarAdc>("APB_SARADC");
+    aes_ = std::make_unique<c3::Aes>("AES");
+    i2c0_ = std::make_unique<I2cController>("I2C0");
+    spi2_ = std::make_unique<c3::GpSpi>("SPI2");
+    attach_i2c_devices(*i2c0_);
+    ledc_ = std::make_unique<c3::Ledc>("LEDC", true);
+    gdma_ = std::make_unique<c3::Gdma>("GDMA", *this, 0x3FC00000, c3::Gdma::Layout::C3);
+    // ADC1 channels 0-4 are GPIO0-4, ADC2 channel 0 is GPIO5. A pad reads
+    // full scale when high and 0 when low or floating.
+    adc_->sample = [this](int unit, int ch) -> uint32_t {
+        int pin = unit == 0 ? (ch <= 4 ? ch : -1) : (ch == 0 ? 5 : -1);
+        return pin >= 0 && gpio_dev_->info(pin).level == 1 ? 4095 : 0;
+    };
 
     uart0_->on_tx = [this](uint8_t b) { if (!cfg_.usb_console) tx_buf_.push_back(b); };
-    uart1_->on_tx = [](uint8_t b) { LOGD("uart1 tx: 0x%02x", b); };
+    // UART1 TX reaches a UART's RX when the GPIO matrix routes both to one pad.
+    uart1_->on_tx = [this](uint8_t b) {
+        bool heard = false;
+        for (auto [uart, rx_sig] : {std::pair{uart0_.get(), kSigU0Rxd}, std::pair{uart1_.get(), kSigU1Rxd}}) {
+            if (gpio_dev_->signal_routed(kSigU1Txd, rx_sig) && uart->rx_space()) uart->push_rx(b), heard = true;
+        }
+        if (!heard) LOGD("uart1 tx: 0x%02x", b);
+    };
+    usb_jtag_->irq = [this](bool l) { intmatrix_->set_source(c3::irq::USB_SERIAL_JTAG, l); };
+    usb_jtag_->frame_number = [this] { return uint32_t(cpu_.cycles * 1000 / clocks_.master_hz); };
     usb_jtag_->on_tx = [this](uint8_t b) { if (cfg_.usb_console) tx_buf_.push_back(b); };
     rtc_cntl_->on_system_reset = [this](double delay) { request_reset(BootMode::Flash, delay); };
     rtc_cntl_->slow_ticks = [this] {
@@ -55,6 +78,21 @@ Esp32c3::Esp32c3(const ChipConfig& cfg)
     uart0_->irq = [this](bool l) { intmatrix_->set_source(c3::irq::UART0, l); };
     uart1_->irq = [this](bool l) { intmatrix_->set_source(c3::irq::UART1, l); };
     timg0_->irq = irq;
+    gdma_->irq = [this](int ch, bool l) { intmatrix_->set_source(c3::irq::DMA_CH0 + ch, l); };
+    // MISO hears MOSI when the GPIO matrix routes FSPID back into FSPIQ; an
+    // unconnected MISO reads 1s.
+    spi2_->exchange = [this](uint8_t mosi) -> uint8_t {
+        return gpio_dev_->signal_routed(kSigFspid, kSigFspiq) ? mosi : 0xFF;
+    };
+    spi2_->dma_read = [this](uint8_t* d, size_t n) { return gdma_->out_read(c3::Gdma::SPI2, d, n); };
+    spi2_->dma_write = [this](const uint8_t* s, size_t n) { gdma_->in_write(c3::Gdma::SPI2, s, n, true); };
+    spi2_->irq = [this](bool l) { intmatrix_->set_source(c3::irq::SPI2, l); };
+    i2c0_->irq = [this](bool l) { intmatrix_->set_source(c3::irq::I2C_EXT0, l); };
+    ledc_->irq = [this](bool l) { intmatrix_->set_source(c3::irq::LEDC, l); };
+    aes_->irq = [this](bool l) { intmatrix_->set_source(c3::irq::AES, l); };
+    aes_->dma_read = [this](uint8_t* d, size_t n) { return gdma_->out_read(c3::Gdma::AES, d, n); };
+    aes_->dma_write = [this](const uint8_t* s, size_t n) { gdma_->in_write(c3::Gdma::AES, s, n, true); };
+    sha_->dma_read = [this](uint8_t* block) { return gdma_->out_read(c3::Gdma::SHA, block, 64) == 64; };
     timg1_->irq = irq;
     timg0_->on_wdt_reset = [this](bool sys) { request_reset(BootMode::Flash, 0), rtc_cntl_->reset_reason = sys ? 7 : 11; };
     timg1_->on_wdt_reset = [this](bool sys) { request_reset(BootMode::Flash, 0), rtc_cntl_->reset_reason = sys ? 8 : 17; };
@@ -80,6 +118,12 @@ Esp32c3::Esp32c3(const ChipConfig& cfg)
     attach(EXTMEM, extmem_.get());
     attach(SYSCON, syscon_.get());
     attach(SHA, sha_.get());
+    attach(APB_SARADC, adc_.get());
+    attach(AES, aes_.get());
+    attach(LEDC, ledc_.get());
+    attach(I2C0, i2c0_.get());
+    attach(SPI2, spi2_.get());
+    attach(GDMA, gdma_.get());
 
     RomProfile rp;
     rp.chip_name = "ESP32-C3";
@@ -128,6 +172,12 @@ void Esp32c3::reset_peripherals(BootMode mode, uint32_t reason) {
     extmem_->reset();
     syscon_->reset();
     sha_->reset();
+    adc_->reset();
+    aes_->reset();
+    ledc_->reset();
+    i2c0_->reset();
+    spi2_->reset();
+    gdma_->reset();
     mmu_->reset();
 }
 

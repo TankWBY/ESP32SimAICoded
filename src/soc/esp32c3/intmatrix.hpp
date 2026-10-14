@@ -19,7 +19,7 @@ namespace irq {
 constexpr int GPIO = 16, UART0 = 21, UART1 = 22, USB_SERIAL_JTAG = 26, RTC_CORE = 27;
 constexpr int TG0_T0 = 32, TG0_WDT = 33, TG1_T0 = 34, TG1_WDT = 35;
 constexpr int SYSTIMER_TARGET0 = 37, SYSTIMER_TARGET1 = 38, SYSTIMER_TARGET2 = 39;
-constexpr int DMA_CH0 = 44, SHA = 49, FROM_CPU0 = 50;
+constexpr int SPI2 = 19, LEDC = 23, I2C_EXT0 = 29, APB_ADC = 43, DMA_CH0 = 44, AES = 48, SHA = 49, FROM_CPU0 = 50;
 constexpr int kSources = 62;
 }  // namespace irq
 

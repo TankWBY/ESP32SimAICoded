@@ -35,6 +35,7 @@ struct ChipConfig {
     bool trace_gpio = true;
     bool usb_console = false;              // serial endpoints carry USB-Serial-JTAG instead of UART0
     std::string rom_path;                  // Espressif ROM ELF (esp-rom-elfs); empty = HLE only
+    std::vector<std::string> i2c_devices;  // virtual I2C devices, e.g. "eeprom@0x50"
 };
 
 class Chip {

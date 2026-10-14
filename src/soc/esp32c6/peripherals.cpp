@@ -10,6 +10,7 @@ namespace esp32sim::c6 {
 namespace pcr {
 constexpr uint32_t SYSCLK_CONF = 0x110, CPU_FREQ_CONF = 0x118, AHB_FREQ_CONF = 0x11C, APB_FREQ_CONF = 0x120,
                    SYSCLK_FREQ_QUERY_0 = 0x124, DATE = 0xFFC;
+constexpr uint32_t TG0_TIMER_CLK = 0x40, TG0_WDT_CLK = 0x44, TG1_TIMER_CLK = 0x4C, TG1_WDT_CLK = 0x50;
 }
 
 void Pcr::reset() {
@@ -33,7 +34,19 @@ uint32_t Pcr::cpu_hz() const {
     }
 }
 
+uint32_t Pcr::timg_hz(int group, bool wdt) const {
+    const uint32_t reg = group == 0 ? (wdt ? pcr::TG0_WDT_CLK : pcr::TG0_TIMER_CLK)
+                                    : (wdt ? pcr::TG1_WDT_CLK : pcr::TG1_TIMER_CLK);
+    switch ((read_const(reg) >> 20) & 3) {
+    case 1: return 80000000u;  // PLL_F80M
+    case 2: return 17500000u;  // RC_FAST
+    default: return 40000000u;  // XTAL
+    }
+}
+
 void Pcr::write(uint32_t off, uint32_t value) {
+    if (before_timg_clock_change && (off == pcr::TG0_TIMER_CLK || off == pcr::TG1_TIMER_CLK))
+        before_timg_clock_change(off == pcr::TG0_TIMER_CLK ? 0 : 1);
     if (off == pcr::SYSCLK_CONF)  // LS/HS_DIV_NUM and CLK_XTAL_FREQ are read-only
         value = (value & (3u << 16)) | (read_const(off) & ~(3u << 16));
     RegisterFile::write(off, value);

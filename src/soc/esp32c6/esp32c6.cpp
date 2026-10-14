@@ -5,6 +5,7 @@
 
 namespace esp32sim {
 
+using c3::kSigU0Rxd, c3::kSigU1Txd, c3::kSigU1Rxd, c3::kSigFspiq, c3::kSigFspid;
 using namespace c6map;
 
 Esp32c6::Esp32c6(const ChipConfig& cfg)
@@ -21,6 +22,7 @@ Esp32c6::Esp32c6(const ChipConfig& cfg)
 
     uart0_ = std::make_unique<c3::Uart>("UART0");
     uart1_ = std::make_unique<c3::Uart>("UART1");
+    uart0_->loopback_bit = uart1_->loopback_bit = 12;
     gpio_dev_ = std::make_unique<c3::Gpio>("GPIO", c6::kPads);
     gpio_dev_->trace = cfg.trace_gpio;
     gpio_ = gpio_dev_.get();
@@ -34,6 +36,18 @@ Esp32c6::Esp32c6(const ChipConfig& cfg)
     lpperi_ = std::make_unique<c3::Syscon>("LPPERI", 0x8);
     sha_ = std::make_unique<c3::Sha>("SHA");
     spi1_ = std::make_unique<SpiMemController>("SPI1", flash_);
+    adc_ = std::make_unique<c3::SarAdc>("APB_SARADC");
+    aes_ = std::make_unique<c3::Aes>("AES");
+    i2c0_ = std::make_unique<I2cController>("I2C0");
+    spi2_ = std::make_unique<c3::GpSpi>("SPI2");
+    attach_i2c_devices(*i2c0_);
+    ledc_ = std::make_unique<c3::Ledc>("LEDC", false);
+    gdma_ = std::make_unique<c3::Gdma>("GDMA", *this, 0x40800000, c3::Gdma::Layout::C6);
+    // ADC1 channels 0-6 are GPIO0-6 (the C6 has no ADC2). A pad reads full
+    // scale when high and 0 when low or floating.
+    adc_->sample = [this](int unit, int ch) -> uint32_t {
+        return unit == 0 && ch <= 6 && gpio_dev_->info(ch).level == 1 ? 4095 : 0;
+    };
     spi0_ = std::make_unique<c6::Spi0Mmu>("SPI0");
     pcr_ = std::make_unique<c6::Pcr>("PCR");
     lp_clkrst_ = std::make_unique<c6::LpClkRst>("LP_CLKRST");
@@ -47,7 +61,16 @@ Esp32c6::Esp32c6(const ChipConfig& cfg)
     clint_ = std::make_unique<RegisterFile>("CLINT");
 
     uart0_->on_tx = [this](uint8_t b) { if (!cfg_.usb_console) tx_buf_.push_back(b); };
-    uart1_->on_tx = [](uint8_t b) { LOGD("uart1 tx: 0x%02x", b); };
+    // UART1 TX reaches a UART's RX when the GPIO matrix routes both to one pad.
+    uart1_->on_tx = [this](uint8_t b) {
+        bool heard = false;
+        for (auto [uart, rx_sig] : {std::pair{uart0_.get(), kSigU0Rxd}, std::pair{uart1_.get(), kSigU1Rxd}}) {
+            if (gpio_dev_->signal_routed(kSigU1Txd, rx_sig) && uart->rx_space()) uart->push_rx(b), heard = true;
+        }
+        if (!heard) LOGD("uart1 tx: 0x%02x", b);
+    };
+    usb_jtag_->irq = [this](bool l) { intmtx_->set_source(c6::irq::USB_SERIAL_JTAG, l); };
+    usb_jtag_->frame_number = [this] { return uint32_t(cpu_.cycles * 1000 / clocks_.master_hz); };
     usb_jtag_->on_tx = [this](uint8_t b) { if (cfg_.usb_console) tx_buf_.push_back(b); };
     lp_aon_->on_sw_reset = [this](uint32_t reason) {
         lp_clkrst_->reset_reason = reason;
@@ -64,7 +87,29 @@ Esp32c6::Esp32c6(const ChipConfig& cfg)
     uart0_->irq = [this](bool l) { intmtx_->set_source(c6::irq::UART0, l); };
     uart1_->irq = [this](bool l) { intmtx_->set_source(c6::irq::UART1, l); };
     timg0_->irq = irq;
+    gdma_->irq = [this](int i, bool l) {
+        intmtx_->set_source(i < 3 ? c6::irq::DMA_IN_CH0 + i : c6::irq::DMA_OUT_CH0 + (i - 3), l);
+    };
+    // MISO hears MOSI when the GPIO matrix routes FSPID back into FSPIQ; an
+    // unconnected MISO reads 1s.
+    spi2_->exchange = [this](uint8_t mosi) -> uint8_t {
+        return gpio_dev_->signal_routed(kSigFspid, kSigFspiq) ? mosi : 0xFF;
+    };
+    spi2_->dma_read = [this](uint8_t* d, size_t n) { return gdma_->out_read(c3::Gdma::SPI2, d, n); };
+    spi2_->dma_write = [this](const uint8_t* s, size_t n) { gdma_->in_write(c3::Gdma::SPI2, s, n, true); };
+    spi2_->irq = [this](bool l) { intmtx_->set_source(c6::irq::GSPI2, l); };
+    i2c0_->irq = [this](bool l) { intmtx_->set_source(c6::irq::I2C_EXT0, l); };
+    ledc_->irq = [this](bool l) { intmtx_->set_source(c6::irq::LEDC, l); };
+    aes_->irq = [this](bool l) { intmtx_->set_source(c6::irq::AES, l); };
+    aes_->dma_read = [this](uint8_t* d, size_t n) { return gdma_->out_read(c3::Gdma::AES, d, n); };
+    aes_->dma_write = [this](const uint8_t* s, size_t n) { gdma_->in_write(c3::Gdma::AES, s, n, true); };
+    sha_->dma_read = [this](uint8_t* block) { return gdma_->out_read(c3::Gdma::SHA, block, 64) == 64; };
     timg1_->irq = irq;
+    timg0_->timer_clock_hz = [this] { return double(pcr_->timg_hz(0, false)); };
+    timg0_->wdt_clock_hz = [this] { return double(pcr_->timg_hz(0, true)); };
+    timg1_->timer_clock_hz = [this] { return double(pcr_->timg_hz(1, false)); };
+    timg1_->wdt_clock_hz = [this] { return double(pcr_->timg_hz(1, true)); };
+    pcr_->before_timg_clock_change = [this](int g) { (g ? timg1_ : timg0_)->clock_changing(); };
     timg0_->on_wdt_reset = [this](bool sys) {
         lp_clkrst_->reset_reason = sys ? c6::reset::TG0_WDT_SYS : c6::reset::TG0_WDT_CPU;
         request_reset(BootMode::Flash, 0);
@@ -87,6 +132,12 @@ Esp32c6::Esp32c6(const ChipConfig& cfg)
     attach(USB_SERIAL_JTAG, usb_jtag_.get());
     attach(INTMTX, intmtx_.get());
     attach(SHA, sha_.get());
+    attach(APB_SARADC, adc_.get());
+    attach(AES, aes_.get());
+    attach(LEDC, ledc_.get());
+    attach(I2C0, i2c0_.get());
+    attach(SPI2, spi2_.get());
+    attach(GDMA, gdma_.get());
     attach(IO_MUX, gpio_dev_->iomux());
     attach(GPIO, gpio_dev_.get());
     attach(PCR, pcr_.get());
@@ -167,6 +218,12 @@ void Esp32c6::reset_peripherals(BootMode mode, uint32_t reason) {
     cache_->reset();
     lpperi_->reset();
     sha_->reset();
+    adc_->reset();
+    aes_->reset();
+    ledc_->reset();
+    i2c0_->reset();
+    spi2_->reset();
+    gdma_->reset();
     clint_->reset();
     spi0_->reset();
 }

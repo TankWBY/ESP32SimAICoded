@@ -26,6 +26,7 @@ public:
     }
     std::function<void(uint8_t)> on_tx;
     std::function<void(bool level)> irq;  // INT_ST != 0
+    int loopback_bit = 14;  // CONF0.LOOPBACK (C6: 12)
 
 private:
     uint32_t int_raw();
@@ -109,12 +110,87 @@ private:
     uint64_t rng_state_ = 0x9E3779B97F4A7C15ull;
 };
 
+// USB-Serial-JTAG, CDC-ACM side, with a host that is always attached and
+// reads every IN packet at once: SOF frames count up once per millisecond,
+// a flushed packet empties the IN endpoint (SERIAL_IN_EMPTY), and bytes from
+// the host arrive in 64-byte OUT packets (SERIAL_OUT_RECV_PKT).
 class UsbSerialJtag : public RegisterFile {
 public:
-    explicit UsbSerialJtag(std::string name) : RegisterFile(std::move(name)) {}
+    static constexpr size_t kPacket = 64;
+    explicit UsbSerialJtag(std::string name) : RegisterFile(std::move(name)) { reset(); }
     uint32_t read(uint32_t off) override;
     void write(uint32_t off, uint32_t value) override;
+    void reset() override;
+    // Host side: the host sends the next OUT packet (up to 64 bytes) once
+    // software has emptied the endpoint, at most one per USB frame.
+    size_t rx_space() const;
+    void push_rx(uint8_t b);
     std::function<void(uint8_t)> on_tx;
+    std::function<void(bool level)> irq;
+    std::function<uint32_t()> frame_number;  // USB SOF counter (1 kHz)
+
+private:
+    void update_irq();
+    std::deque<uint8_t> rx_;
+    uint32_t int_raw_ = 0;
+    uint32_t rx_frame_ = ~0u;  // frame of the last OUT packet
+};
+
+// LED PWM controller (LEDC): register state plus what software can observe
+// of it. Duty and timer updates take effect at once (DUTY_R follows DUTY),
+// and a duty change or fade ends immediately with its DUTY_CHNG_END
+// interrupt. C3-style fades (step fields in CONF1) land on their final duty;
+// the C6's gamma-RAM fades are not modelled and stay at the start duty.
+class Ledc : public RegisterFile {
+public:
+    static constexpr int kChannels = 6;
+    Ledc(std::string name, bool conf1_fade) : RegisterFile(std::move(name)), conf1_fade_(conf1_fade) {}
+    uint32_t read(uint32_t off) override;
+    void write(uint32_t off, uint32_t value) override;
+    void reset() override;
+    std::function<void(bool level)> irq;
+
+private:
+    void update_irq();
+    bool conf1_fade_;
+    uint32_t int_raw_ = 0;
+};
+
+// General-purpose SPI controller (GP-SPI2) in master mode: a transaction
+// runs as soon as CMD.USR is set. Data comes from W0-W15 or the GDMA TX link
+// and what is clocked in on MISO lands in W0-W15 or the GDMA RX link.
+// `exchange` gives the MISO byte for each MOSI byte.
+class GpSpi : public RegisterFile {
+public:
+    explicit GpSpi(std::string name) : RegisterFile(std::move(name)) {}
+    uint32_t read(uint32_t off) override;
+    void write(uint32_t off, uint32_t value) override;
+    void reset() override;
+    std::function<uint8_t(uint8_t mosi)> exchange;
+    std::function<size_t(uint8_t* dst, size_t len)> dma_read;
+    std::function<void(const uint8_t* src, size_t len)> dma_write;
+    std::function<void(bool level)> irq;
+
+private:
+    void transfer();
+    void update_irq();
+    uint32_t int_raw_ = 0;
+};
+
+// SAR ADC digital controller (APB_SARADC), same layout on the C3 and C6:
+// one-shot conversions only. A conversion completes as soon as it is
+// started; `sample` supplies the 12-bit result for (unit, channel), and the
+// internal calibration channel reads 0.
+class SarAdc : public RegisterFile {
+public:
+    explicit SarAdc(std::string name) : RegisterFile(std::move(name)) {}
+    uint32_t read(uint32_t off) override;
+    void write(uint32_t off, uint32_t value) override;
+    void reset() override;
+    std::function<uint32_t(int unit, int channel)> sample;
+
+private:
+    uint32_t int_raw_ = 0;
 };
 
 }  // namespace esp32sim::c3
