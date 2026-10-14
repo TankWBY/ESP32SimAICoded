@@ -1,0 +1,238 @@
+{
+ "board": "esp32-c3-devkitc-02",
+ "name": "ESP32-C3-DevKitC-02",
+ "image": "images/esp32-c3-devkitc-02.png",
+ "width": 278,
+ "height": 516,
+ "credit": "Board drawing: Espressif Systems, esp-dev-kits documentation, CC BY-SA 4.0.",
+ "source": "https://github.com/espressif/esp-dev-kits",
+ "wiki": "https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32c3/esp32-c3-devkitc-02/",
+ "pins": [
+  {
+   "label": "GND",
+   "x": 17,
+   "y": 98.5,
+   "side": "left"
+  },
+  {
+   "label": "3V3",
+   "x": 17,
+   "y": 126.5,
+   "side": "left"
+  },
+  {
+   "label": "3V3",
+   "x": 17,
+   "y": 155.5,
+   "side": "left"
+  },
+  {
+   "label": "RST",
+   "x": 17,
+   "y": 183.5,
+   "side": "left"
+  },
+  {
+   "label": "GND",
+   "x": 17,
+   "y": 211.5,
+   "side": "left"
+  },
+  {
+   "label": "GPIO4",
+   "x": 17,
+   "y": 240.5,
+   "side": "left",
+   "gpio": 4
+  },
+  {
+   "label": "GPIO5",
+   "x": 17,
+   "y": 268.5,
+   "side": "left",
+   "gpio": 5
+  },
+  {
+   "label": "GPIO6",
+   "x": 17,
+   "y": 296.5,
+   "side": "left",
+   "gpio": 6
+  },
+  {
+   "label": "GPIO7",
+   "x": 17,
+   "y": 325.5,
+   "side": "left",
+   "gpio": 7
+  },
+  {
+   "label": "GND",
+   "x": 17,
+   "y": 353.5,
+   "side": "left"
+  },
+  {
+   "label": "GPIO8",
+   "x": 17,
+   "y": 381.5,
+   "side": "left",
+   "gpio": 8,
+   "alt": "RGB LED"
+  },
+  {
+   "label": "GPIO9",
+   "x": 17,
+   "y": 410.5,
+   "side": "left",
+   "gpio": 9,
+   "alt": "BOOT"
+  },
+  {
+   "label": "5V",
+   "x": 17,
+   "y": 438.5,
+   "side": "left"
+  },
+  {
+   "label": "5V",
+   "x": 17,
+   "y": 466.5,
+   "side": "left"
+  },
+  {
+   "label": "GND",
+   "x": 17,
+   "y": 495.5,
+   "side": "left"
+  },
+  {
+   "label": "GND",
+   "x": 261,
+   "y": 98.5,
+   "side": "right"
+  },
+  {
+   "label": "GPIO0",
+   "x": 261,
+   "y": 126.5,
+   "side": "right",
+   "gpio": 0
+  },
+  {
+   "label": "GPIO1",
+   "x": 261,
+   "y": 155.5,
+   "side": "right",
+   "gpio": 1
+  },
+  {
+   "label": "GPIO2",
+   "x": 261,
+   "y": 183.5,
+   "side": "right",
+   "gpio": 2
+  },
+  {
+   "label": "GPIO3",
+   "x": 261,
+   "y": 211.5,
+   "side": "right",
+   "gpio": 3
+  },
+  {
+   "label": "GND",
+   "x": 261,
+   "y": 240.5,
+   "side": "right"
+  },
+  {
+   "label": "GPIO10",
+   "x": 261,
+   "y": 268.5,
+   "side": "right",
+   "gpio": 10
+  },
+  {
+   "label": "GND",
+   "x": 261,
+   "y": 296.5,
+   "side": "right"
+  },
+  {
+   "label": "GPIO20",
+   "x": 261,
+   "y": 325.5,
+   "side": "right",
+   "gpio": 20,
+   "alt": "RX"
+  },
+  {
+   "label": "GPIO21",
+   "x": 261,
+   "y": 353.5,
+   "side": "right",
+   "gpio": 21,
+   "alt": "TX"
+  },
+  {
+   "label": "GND",
+   "x": 261,
+   "y": 381.5,
+   "side": "right"
+  },
+  {
+   "label": "GPIO18",
+   "x": 261,
+   "y": 410.5,
+   "side": "right",
+   "gpio": 18,
+   "alt": "USB D-"
+  },
+  {
+   "label": "GPIO19",
+   "x": 261,
+   "y": 438.5,
+   "side": "right",
+   "gpio": 19,
+   "alt": "USB D+"
+  },
+  {
+   "label": "GND",
+   "x": 261,
+   "y": 466.5,
+   "side": "right"
+  },
+  {
+   "label": "GND",
+   "x": 261,
+   "y": 495.5,
+   "side": "right"
+  }
+ ],
+ "parts": [
+  {
+   "type": "button",
+   "role": "boot",
+   "label": "BOOT",
+   "x": 57,
+   "y": 475,
+   "r": 20
+  },
+  {
+   "type": "button",
+   "role": "reset",
+   "label": "RST",
+   "x": 220,
+   "y": 475,
+   "r": 20
+  },
+  {
+   "type": "rgbled",
+   "gpio": 8,
+   "label": "RGB LED (WS2812)",
+   "x": 210,
+   "y": 262
+  }
+ ]
+}

@@ -1,0 +1,2426 @@
+{
+ "source": "github.com/platformio/platform-espressif32@e51e90a",
+ "generated": "2026-10-14",
+ "boards": [
+  {
+   "id": "4d_systems_esp32s3_gen4_r8n16",
+   "name": "4D Systems GEN4-ESP32 16MB (ESP32S3-R8N16)",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "4D Systems",
+   "url": "https://4dsystems.com.au/products"
+  },
+  {
+   "id": "adafruit_camera_esp32s3",
+   "name": "Adafruit pyCamera S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/"
+  },
+  {
+   "id": "adafruit_feather_esp32_v2",
+   "name": "Adafruit Feather ESP32 V2",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5400"
+  },
+  {
+   "id": "adafruit_feather_esp32s2",
+   "name": "Adafruit Feather ESP32-S2",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5000"
+  },
+  {
+   "id": "adafruit_feather_esp32s2_reversetft",
+   "name": "Adafruit Feather ESP32-S2 Reverse TFT",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5345"
+  },
+  {
+   "id": "adafruit_feather_esp32s2_tft",
+   "name": "Adafruit Feather ESP32-S2 TFT",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5300"
+  },
+  {
+   "id": "adafruit_feather_esp32s3",
+   "name": "Adafruit Feather ESP32-S3 2MB PSRAM",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5477"
+  },
+  {
+   "id": "adafruit_feather_esp32s3_nopsram",
+   "name": "Adafruit Feather ESP32-S3 No PSRAM",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5323"
+  },
+  {
+   "id": "adafruit_feather_esp32s3_reversetft",
+   "name": "Adafruit Feather ESP32-S3 Reverse TFT",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5691"
+  },
+  {
+   "id": "adafruit_feather_esp32s3_tft",
+   "name": "Adafruit Feather ESP32-S3 TFT",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5483"
+  },
+  {
+   "id": "adafruit_funhouse_esp32s2",
+   "name": "Adafruit FunHouse",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/4985"
+  },
+  {
+   "id": "adafruit_itsybitsy_esp32",
+   "name": "Adafruit ItsyBitsy ESP32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/4363"
+  },
+  {
+   "id": "adafruit_magtag29_esp32s2",
+   "name": "Adafruit MagTag 2.9",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/4800"
+  },
+  {
+   "id": "adafruit_matrixportal_esp32s3",
+   "name": "Adafruit MatrixPortal ESP32-S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5778"
+  },
+  {
+   "id": "adafruit_metro_esp32s2",
+   "name": "Adafruit Metro ESP32-S2",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/4775"
+  },
+  {
+   "id": "adafruit_metro_esp32s3",
+   "name": "Adafruit Metro ESP32-S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5500"
+  },
+  {
+   "id": "adafruit_qtpy_esp32",
+   "name": "Adafruit QT Py ESP32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5395"
+  },
+  {
+   "id": "adafruit_qtpy_esp32c3",
+   "name": "Adafruit QT Py ESP32-C3",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5405"
+  },
+  {
+   "id": "adafruit_qtpy_esp32s2",
+   "name": "Adafruit QT Py ESP32-S2",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5325"
+  },
+  {
+   "id": "adafruit_qtpy_esp32s3_n4r2",
+   "name": "Adafruit QT Py ESP32-S3 (4M Flash 2M PSRAM)",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5700"
+  },
+  {
+   "id": "adafruit_qtpy_esp32s3_nopsram",
+   "name": "Adafruit QT Py ESP32-S3 No PSRAM",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5426"
+  },
+  {
+   "id": "adafruit_qualia_s3_rgb666",
+   "name": "Adafruit Qualia ESP32-S3 RGB666",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/5800"
+  },
+  {
+   "id": "airm2m_core_esp32c3",
+   "name": "AirM2M CORE ESP32C3",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "AirM2M",
+   "url": "https://wiki.luatos.com/chips/esp32c3/board.html"
+  },
+  {
+   "id": "alksesp32",
+   "name": "ALKS ESP32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "RoboticsBrno",
+   "url": "https://github.com/RoboticsBrno/ArduinoLearningKitStarter.git"
+  },
+  {
+   "id": "arduino_nano_esp32",
+   "name": "Arduino Nano ESP32",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "Arduino",
+   "url": "https://docs.arduino.cc/hardware/nano-esp32"
+  },
+  {
+   "id": "atd147_s3",
+   "name": "ArtronShop ATD1.47-S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "ArtronShop",
+   "url": "https://github.com/ArtronShop"
+  },
+  {
+   "id": "atmegazero_esp32s2",
+   "name": "EspinalLab ATMegaZero ESP32-S2",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "EspinalLab",
+   "url": "https://shop.atmegazero.com/"
+  },
+  {
+   "id": "aventen_s3_sync",
+   "name": "Aventen S3 Sync",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "Aventen",
+   "url": "https://www.linkedin.com/company/aventen/"
+  },
+  {
+   "id": "az-delivery-devkit-v4",
+   "name": "AZ-Delivery ESP-32 Dev Kit C V4",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 532480,
+   "vendor": "AZ-Delivery",
+   "url": "https://www.az-delivery.com/products/esp-32-dev-kit-c-v4"
+  },
+  {
+   "id": "bee_data_logger",
+   "name": "Smart Bee Data Logger",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Smart Bee",
+   "url": "https://github.com/strid3r21/Bee-Data-Logger"
+  },
+  {
+   "id": "bee_motion",
+   "name": "Smart Bee Motion",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Smart Bee",
+   "url": "https://github.com/strid3r21/Bee-Motion"
+  },
+  {
+   "id": "bee_motion_mini",
+   "name": "Smart Bee Motion Mini",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Smart Bee",
+   "url": "https://github.com/strid3r21/BeeMotionMini"
+  },
+  {
+   "id": "bee_motion_s3",
+   "name": "Smart Bee Motion S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Smart Bee",
+   "url": "https://github.com/strid3r21/BeeMotionS3/"
+  },
+  {
+   "id": "bee_s3",
+   "name": "Smart Bee S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Smart Bee",
+   "url": "https://github.com/strid3r21/BeeS3"
+  },
+  {
+   "id": "bpi-bit",
+   "name": "BPI-Bit",
+   "mcu": "esp32",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "BPI Tech",
+   "url": "https://en.wikipedia.org/wiki/ESP32"
+  },
+  {
+   "id": "bpi_leaf_s3",
+   "name": "BPI-Leaf-S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "BPI Tech",
+   "url": "https://wiki.banana-pi.org/BPI-Leaf-S3"
+  },
+  {
+   "id": "cezerio_dev_esp32c6",
+   "name": "cezerio dev ESP32C6",
+   "mcu": "esp32c6",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "cezerio",
+   "url": "https://cezerio.com/cezerio_dev_esp32c6"
+  },
+  {
+   "id": "cezerio_mini_dev_esp32c6",
+   "name": "cezerio mini dev ESP32C6",
+   "mcu": "esp32c6",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "cezerio",
+   "url": "https://cezerio.com/cezerio_mini_dev_esp32c6"
+  },
+  {
+   "id": "cnrs_aw2eth",
+   "name": "CNRS AW2ETH",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "CNRS",
+   "url": "https://en.wikipedia.org/wiki/ESP32"
+  },
+  {
+   "id": "connaxio_espoir",
+   "name": "Connaxio's Espoir",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Connaxio",
+   "url": "https://www.connaxio.com/electronics/espoir/"
+  },
+  {
+   "id": "cytron_maker_feather_aiot_s3",
+   "name": "Cytron Maker Feather AIoT S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Cytron Technologies",
+   "url": "https://sg.cytron.io/c-development-tools/c-maker-series/p-v-maker-feather-aiot-s3-simplifying-aiot-with-esp32"
+  },
+  {
+   "id": "d-duino-32",
+   "name": "D-duino-32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "DSTIKE",
+   "url": "https://www.tindie.com/products/lspoplove/dstike-d-duino-32-v3/"
+  },
+  {
+   "id": "deneyapkart",
+   "name": "Deneyap Kart",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "T3 Foundation",
+   "url": "https://magaza.deneyapkart.org/tr/product/detail/deneyap-kart"
+  },
+  {
+   "id": "deneyapkart1A",
+   "name": "Deneyap Kart 1A",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "T3 Foundation",
+   "url": "https://magaza.deneyapkart.org/tr/product/detail/deneyap-kart-1a"
+  },
+  {
+   "id": "deneyapkart1Av2",
+   "name": "Deneyap Kart 1A v2",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "T3 Foundation",
+   "url": "https://magaza.deneyapkart.org/tr/product/detail/deneyap-kart-1a-v2-type-c"
+  },
+  {
+   "id": "deneyapkartg",
+   "name": "Deneyap Kart G",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "T3 Foundation",
+   "url": "https://magaza.deneyapkart.org/tr/product/detail/deneyap-kart-g-type-c"
+  },
+  {
+   "id": "deneyapmini",
+   "name": "Deneyap Mini",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "T3 Foundation",
+   "url": "https://magaza.deneyapkart.org/tr/product/detail/deneyap-mini"
+  },
+  {
+   "id": "deneyapminiv2",
+   "name": "Deneyap Mini v2",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "T3 Foundation",
+   "url": "https://magaza.deneyapkart.org/tr/product/detail/deneyap-mini-v2-type-c"
+  },
+  {
+   "id": "denky32",
+   "name": "Denky32 (WROOM32)",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Denky",
+   "url": "https://en.wikipedia.org/wiki/ESP32"
+  },
+  {
+   "id": "denky_d4",
+   "name": "Denky D4 (PICO-V3-02)",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Denky",
+   "url": "https://en.wikipedia.org/wiki/ESP32"
+  },
+  {
+   "id": "dfrobot_beetle_esp32c3",
+   "name": "DFRobot Beetle ESP32-C3",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "DFRobot",
+   "url": "https://www.dfrobot.com/product-2566.html"
+  },
+  {
+   "id": "dfrobot_firebeetle2_esp32e",
+   "name": "DFRobot Firebeetle 2 ESP32-E",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "DFRobot",
+   "url": "https://wiki.dfrobot.com/FireBeetle_Board_ESP32_E_SKU_DFR0654"
+  },
+  {
+   "id": "dfrobot_firebeetle2_esp32s3",
+   "name": "DFRobot Firebeetle 2 ESP32-S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "DFRobot",
+   "url": "https://www.dfrobot.com/product-1590.html"
+  },
+  {
+   "id": "dfrobot_romeo_esp32s3",
+   "name": "DFRobot Romeo ESP32-S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "DFRobot",
+   "url": "https://wiki.dfrobot.com/"
+  },
+  {
+   "id": "dpu_esp32",
+   "name": "TAMC DPU ESP32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "TAMC",
+   "url": "https://github.com/TAMCTec/dpu-esp32"
+  },
+  {
+   "id": "edgebox-esp-100",
+   "name": "Seeed Studio Edgebox-ESP-100",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "Seeed Studio",
+   "url": "https://www.seeedstudio.com/EdgeBox-ESP-100-p-5490.html"
+  },
+  {
+   "id": "esp-wrover-kit",
+   "name": "Espressif ESP-WROVER-KIT",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Espressif",
+   "url": "https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32/esp-wrover-kit/index.html"
+  },
+  {
+   "id": "esp32-c3-devkitc-02",
+   "name": "Espressif ESP32-C3-DevKitC-02",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Espressif",
+   "url": "https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/hw-reference/esp32c3/user-guide-devkitc-02.html"
+  },
+  {
+   "id": "esp32-c3-devkitm-1",
+   "name": "Espressif ESP32-C3-DevKitM-1",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Espressif",
+   "url": "https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/hw-reference/esp32c3/user-guide-devkitm-1.html"
+  },
+  {
+   "id": "esp32-c3-m1i-kit",
+   "name": "Ai-Thinker ESP-C3-M1-I-Kit",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Ai-Thinker",
+   "url": "https://docs.ai-thinker.com/en/esp32c3"
+  },
+  {
+   "id": "esp32-c6-devkitc-1",
+   "name": "Espressif ESP32-C6-DevKitC-1",
+   "mcu": "esp32c6",
+   "f_cpu": 160000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Espressif",
+   "url": "https://docs.espressif.com/projects/espressif-esp-dev-kits/en/latest/esp32c6/esp32-c6-devkitc-1/index.html"
+  },
+  {
+   "id": "esp32-c6-devkitm-1",
+   "name": "Espressif ESP32-C6-DevKitM-1",
+   "mcu": "esp32c6",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Espressif",
+   "url": "https://docs.espressif.com/projects/espressif-esp-dev-kits/en/latest/esp32c6/esp32-c6-devkitm-1/index.html"
+  },
+  {
+   "id": "esp32-devkitlipo",
+   "name": "OLIMEX ESP32-DevKit-LiPo",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "OLIMEX",
+   "url": "https://www.olimex.com/Products/IoT/ESP32/ESP32-DevKit-LiPo/open-source-hardware"
+  },
+  {
+   "id": "esp32-evb",
+   "name": "OLIMEX ESP32-EVB",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "OLIMEX",
+   "url": "https://www.olimex.com/Products/IoT/ESP32-EVB/open-source-hardware"
+  },
+  {
+   "id": "esp32-gateway",
+   "name": "OLIMEX ESP32-GATEWAY",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "OLIMEX",
+   "url": "https://www.olimex.com/Products/IoT/ESP32-GATEWAY/open-source-hardware"
+  },
+  {
+   "id": "esp32-pico-devkitm-2",
+   "name": "Espressif ESP32-PICO-DevKitM-2",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Espressif Systems",
+   "url": "https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-pico-devkitm-2.html"
+  },
+  {
+   "id": "esp32-poe",
+   "name": "OLIMEX ESP32-PoE",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "OLIMEX",
+   "url": "https://www.olimex.com/Products/IoT/ESP32/ESP32-POE/open-source-hardware"
+  },
+  {
+   "id": "esp32-poe-iso",
+   "name": "OLIMEX ESP32-PoE-ISO",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "OLIMEX",
+   "url": "https://www.olimex.com/Products/IoT/ESP32/ESP32-POE-ISO/open-source-hardware"
+  },
+  {
+   "id": "esp32-pro",
+   "name": "OLIMEX ESP32-PRO",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "OLIMEX",
+   "url": "https://www.olimex.com/Products/IoT/ESP32/ESP32-PRO/open-source-hardware"
+  },
+  {
+   "id": "esp32-s2-franzininho",
+   "name": "Franzininho WiFi Board",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Franzininho",
+   "url": "https://github.com/Franzininho/Franzininho-WIFI"
+  },
+  {
+   "id": "esp32-s2-kaluga-1",
+   "name": "Espressif ESP32-S2-Kaluga-1 Kit",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Espressif",
+   "url": "https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/hw-reference/esp32s2/user-guide-esp32-s2-kaluga-1-kit.html"
+  },
+  {
+   "id": "esp32-s2-saola-1",
+   "name": "Espressif ESP32-S2-Saola-1",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Espressif",
+   "url": "https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/hw-reference/esp32s2/user-guide-saola-1-v1.2.html"
+  },
+  {
+   "id": "esp32-s3-devkitc-1",
+   "name": "Espressif ESP32-S3-DevKitC-1-N8 (8 MB QD, No PSRAM)",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Espressif",
+   "url": "https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/hw-reference/esp32s3/user-guide-devkitc-1.html"
+  },
+  {
+   "id": "esp32-s3-devkitm-1",
+   "name": "Espressif ESP32-S3-DevKitM-1",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Espressif",
+   "url": "https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/hw-reference/esp32s3/user-guide-devkitm-1.html"
+  },
+  {
+   "id": "esp320",
+   "name": "Electronic SweetPeas ESP320",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Electronic SweetPeas",
+   "url": "http://www.sweetpeas.se/controller-modules/10-esp210.html"
+  },
+  {
+   "id": "esp32cam",
+   "name": "AI Thinker ESP32-CAM",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "AI Thinker",
+   "url": "https://wiki.ai-thinker.com/esp32-cam"
+  },
+  {
+   "id": "esp32dev",
+   "name": "Espressif ESP32 Dev Module",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Espressif",
+   "url": "https://en.wikipedia.org/wiki/ESP32"
+  },
+  {
+   "id": "esp32doit-devkit-v1",
+   "name": "DOIT ESP32 DEVKIT V1",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "DOIT",
+   "url": "http://www.doit.am/"
+  },
+  {
+   "id": "esp32doit-espduino",
+   "name": "DOIT ESPduino32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "DOIT",
+   "url": "http://www.doit.am/"
+  },
+  {
+   "id": "esp32s3_powerfeather",
+   "name": "ESP32-S3 PowerFeather",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "PowerFeather",
+   "url": "https://powerfeather.dev/"
+  },
+  {
+   "id": "esp32s3box",
+   "name": "Espressif ESP32-S3-Box",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "Espressif",
+   "url": "https://www.adafruit.com/product/5290"
+  },
+  {
+   "id": "esp32s3camlcd",
+   "name": "ESP32S3 CAM LCD",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Espressif",
+   "url": "https://www.espressif.com/en/news/Maple_Eye_ESP32-S3"
+  },
+  {
+   "id": "esp32s3usbotg",
+   "name": "Espressif ESP32-S3-USB-OTG",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Espressif",
+   "url": "https://docs.espressif.com/projects/espressif-esp-dev-kits/en/latest/esp32s3/esp32-s3-usb-otg/user_guide.html"
+  },
+  {
+   "id": "esp32thing",
+   "name": "SparkFun ESP32 Thing",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "SparkFun Electronics",
+   "url": "https://www.sparkfun.com/products/13907"
+  },
+  {
+   "id": "esp32thing_plus",
+   "name": "SparkFun ESP32 Thing Plus",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "SparkFun Electronics",
+   "url": "https://www.sparkfun.com/products/15663"
+  },
+  {
+   "id": "esp32vn-iot-uno",
+   "name": "ESP32vn IoT Uno",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "ESP32vn",
+   "url": "https://esp32.vn/"
+  },
+  {
+   "id": "espea32",
+   "name": "April Brother ESPea32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "April Brother",
+   "url": "https://blog.aprbrother.com/product/espea"
+  },
+  {
+   "id": "espectro32",
+   "name": "ESPectro32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "DycodeX",
+   "url": "https://shop.makestro.com/product/espectro32"
+  },
+  {
+   "id": "espino32",
+   "name": "ESPino32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "ThaiEasyElec",
+   "url": "http://thaieasyelec.com/products/development-boards/espino-wifi-development-board-detail.html"
+  },
+  {
+   "id": "etboard",
+   "name": "ETBoard",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "ETBoard",
+   "url": "http://et.ketri.re.kr"
+  },
+  {
+   "id": "featheresp32",
+   "name": "Adafruit ESP32 Feather",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/3405"
+  },
+  {
+   "id": "featheresp32-s2",
+   "name": "Adafruit ESP32-S2 Feather Development Board",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Adafruit",
+   "url": "https://www.adafruit.com/product/4769"
+  },
+  {
+   "id": "firebeetle32",
+   "name": "FireBeetle-ESP32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 532480,
+   "vendor": "DFRobot",
+   "url": "https://wiki.dfrobot.com/FireBeetle_ESP32_IOT_Microcontroller(V3.0)__Supports_Wi-Fi_&_Bluetooth__SKU__DFR0478"
+  },
+  {
+   "id": "fm-devkit",
+   "name": "ESP32 FM DevKit",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Unknown",
+   "url": "https://github.com/dragon-engineer/esp32_fmdevkit"
+  },
+  {
+   "id": "franzininho_wifi_esp32s2",
+   "name": "Franzininho WiFi",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Franzininho",
+   "url": "https://docs.franzininho.com.br/docs/franzininho-wifi/franzininho-wifi/"
+  },
+  {
+   "id": "franzininho_wifi_msc_esp32s2",
+   "name": "Franzininho WiFi MSC",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Franzininho",
+   "url": "https://docs.franzininho.com.br/docs/franzininho-wifi/franzininho-wifi/"
+  },
+  {
+   "id": "freenove_esp32_s3_wroom",
+   "name": "Freenove ESP32-S3 WROOM N8R8 (8MB Flash / 8MB PSRAM)",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Freenove",
+   "url": "https://github.com/Freenove/Freenove_ESP32_S3_WROOM_Board"
+  },
+  {
+   "id": "freenove_esp32_wrover",
+   "name": "Freenove ESP32-Wrover",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Freenove",
+   "url": "https://store.freenove.com/products/fnk0060"
+  },
+  {
+   "id": "frogboard",
+   "name": "Frog Board ESP32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Fred",
+   "url": "https://www.tindie.com/products/fred_IOT/esp32s-esp-wroom32-frogopins-development-board/"
+  },
+  {
+   "id": "healthypi4",
+   "name": "ProtoCentral HealthyPi 4",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "ProtoCentral",
+   "url": "https://healthypi.protocentral.com"
+  },
+  {
+   "id": "heltec_wifi_kit_32",
+   "name": "Heltec WiFi Kit 32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Heltec Automation",
+   "url": "http://www.heltec.cn/project/wifi-kit-32/?lang=en"
+  },
+  {
+   "id": "heltec_wifi_kit_32_V3",
+   "name": "Heltec WiFi Kit 32 (V3)",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Heltec",
+   "url": "https://heltec.org/project/wifi-kit-32-v3/"
+  },
+  {
+   "id": "heltec_wifi_kit_32_v2",
+   "name": "Heltec WiFi Kit 32 (V2)",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Heltec Automation",
+   "url": "http://www.heltec.cn/project/wifi-kit-32/?lang=en"
+  },
+  {
+   "id": "heltec_wifi_lora_32",
+   "name": "Heltec WiFi LoRa 32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Heltec Automation",
+   "url": "http://www.heltec.cn"
+  },
+  {
+   "id": "heltec_wifi_lora_32_V2",
+   "name": "Heltec WiFi LoRa 32 (V2)",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Heltec Automation",
+   "url": "http://www.heltec.cn/project/wifi-lora-32/?lang=en"
+  },
+  {
+   "id": "heltec_wifi_lora_32_V3",
+   "name": "Heltec WiFi LoRa 32 (V3)",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Heltec",
+   "url": "https://heltec.org/project/wifi-lora-32-v3/"
+  },
+  {
+   "id": "heltec_wireless_stick",
+   "name": "Heltec Wireless Stick",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Heltec Automation",
+   "url": "http://www.heltec.cn/project/wireless-stick/?lang=en"
+  },
+  {
+   "id": "heltec_wireless_stick_lite",
+   "name": "Heltec Wireless Stick Lite",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Heltec Automation",
+   "url": "https://heltec.org/project/wireless-stick-lite/"
+  },
+  {
+   "id": "honeylemon",
+   "name": "HONEYLemon",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "HONEYLemon",
+   "url": "https://en.wikipedia.org/wiki/ESP32"
+  },
+  {
+   "id": "hornbill32dev",
+   "name": "Hornbill ESP32 Dev",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Hornbill",
+   "url": "https://hackaday.io/project/18997-hornbill"
+  },
+  {
+   "id": "hornbill32minima",
+   "name": "Hornbill ESP32 Minima",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Hornbill",
+   "url": "https://hackaday.io/project/18997-hornbill"
+  },
+  {
+   "id": "imbrios-logsens-v1p1",
+   "name": "Imbrios LogSens V1P1",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Imbrios",
+   "url": "https://www.imbrios.com/products/logsens"
+  },
+  {
+   "id": "inex_openkb",
+   "name": "INEX OpenKB",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "INEX",
+   "url": "https://inex.co.th/home/product/openkb/"
+  },
+  {
+   "id": "intorobot",
+   "name": "IntoRobot Fig",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "IntoRobot",
+   "url": "http://docs.intorobot.com/zh/hardware/fig/hardware/"
+  },
+  {
+   "id": "iotaap_magnolia",
+   "name": "IoTaaP Magnolia",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "IoTaaP",
+   "url": "https://www.iotaap.io"
+  },
+  {
+   "id": "iotbusio",
+   "name": "oddWires IoT-Bus Io",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "oddWires",
+   "url": "http://www.oddwires.com/iot-bus-io-esp32-processor-with-wifi-and-bluetooth/"
+  },
+  {
+   "id": "iotbusproteus",
+   "name": "oddWires IoT-Bus Proteus",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "oddWires",
+   "url": "http://www.oddwires.com/proteus-iot-bus-esp32-microprocessor-wi-fi-and-bluetooth-with-prototype-board-form-factor/"
+  },
+  {
+   "id": "ioxesp32",
+   "name": "ArtronShop IOXESP32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "ArtronShop",
+   "url": "https://docs.ioxesp32.com/"
+  },
+  {
+   "id": "ioxesp32ps",
+   "name": "ArtronShop IOXESP32PS",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "ArtronShop",
+   "url": "https://docs.ioxesp32.com/"
+  },
+  {
+   "id": "kb32-ft",
+   "name": "MakerAsia KB32-FT",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "MakerAsia",
+   "url": "https://kb32ft.makerasia.com/"
+  },
+  {
+   "id": "kits-edu",
+   "name": "KITS ESP32 EDU",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "KITS",
+   "url": "http://www.koreaits.com/new/product/summary.htm?goods_no=468&mid_no=103&no=17"
+  },
+  {
+   "id": "labplus_mpython",
+   "name": "Labplus mPython",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Labplus",
+   "url": "https://github.com/labplus-cn/mpython"
+  },
+  {
+   "id": "lilka_v2",
+   "name": "Lilka v2",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "Anderson & friends",
+   "url": "https://github.com/and3rson/lilka"
+  },
+  {
+   "id": "lilygo-t-display",
+   "name": "LilyGo T-Display",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "LilyGo",
+   "url": "https://www.lilygo.cc/products/lilygo%C2%AE-ttgo-t-display-1-14-inch-lcd-esp32-control-board"
+  },
+  {
+   "id": "lilygo-t-display-s3",
+   "name": "LilyGo T-Display-S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "LilyGo",
+   "url": "https://www.lilygo.cc/products/t-display-s3"
+  },
+  {
+   "id": "lilygo-t3-s3",
+   "name": "LilyGo T3-S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "LilyGo",
+   "url": "https://lilygo.cc/products/t3s3-v1-0"
+  },
+  {
+   "id": "lionbit",
+   "name": "Lion:Bit Dev Board",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Lion:Bit",
+   "url": "http://lionbit.lk/"
+  },
+  {
+   "id": "lionbits3",
+   "name": "Lion:Bit S3 STEM Dev Board",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Lion:Bit",
+   "url": "https://lionbit.cc/shop/"
+  },
+  {
+   "id": "lolin32",
+   "name": "WEMOS LOLIN32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "WEMOS",
+   "url": "https://wiki.wemos.cc/products:lolin32:lolin32"
+  },
+  {
+   "id": "lolin32_lite",
+   "name": "WEMOS LOLIN32 Lite",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "WEMOS",
+   "url": "https://diyprojects.io/wemos-lolin32-lite-compact-revision-lolin32-4-90/"
+  },
+  {
+   "id": "lolin_c3_mini",
+   "name": "WEMOS LOLIN C3 Mini",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "WEMOS",
+   "url": "https://www.wemos.cc/en/latest/c3/c3_mini.html"
+  },
+  {
+   "id": "lolin_d32",
+   "name": "WEMOS LOLIN D32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "WEMOS",
+   "url": "https://wiki.wemos.cc/products:d32:d32"
+  },
+  {
+   "id": "lolin_d32_pro",
+   "name": "WEMOS LOLIN D32 PRO",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "WEMOS",
+   "url": "https://www.wemos.cc/en/latest/d32/d32_pro.html"
+  },
+  {
+   "id": "lolin_s2_mini",
+   "name": "WEMOS LOLIN S2 Mini",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "WEMOS",
+   "url": "https://www.wemos.cc/en/latest/s2/s2_mini.html"
+  },
+  {
+   "id": "lolin_s2_pico",
+   "name": "WEMOS LOLIN S2 PICO",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "WEMOS",
+   "url": "https://www.wemos.cc/en/latest/s2/s2_pico.html"
+  },
+  {
+   "id": "lolin_s3",
+   "name": "WEMOS LOLIN S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "WEMOS",
+   "url": "https://www.wemos.cc/en/latest/s3/index.html"
+  },
+  {
+   "id": "lolin_s3_mini",
+   "name": "WEMOS LOLIN S3 Mini",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "WEMOS",
+   "url": "https://www.wemos.cc/en/latest/s3/index.html"
+  },
+  {
+   "id": "lolin_s3_pro",
+   "name": "WEMOS LOLIN S3 PRO",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "WEMOS",
+   "url": "https://www.wemos.cc/en/latest/s3/s3_pro.html"
+  },
+  {
+   "id": "lopy",
+   "name": "Pycom LoPy",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Pycom Ltd.",
+   "url": "https://pycom.io/"
+  },
+  {
+   "id": "lopy4",
+   "name": "Pycom LoPy4",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 1310720,
+   "vendor": "Pycom Ltd.",
+   "url": "https://pycom.io/"
+  },
+  {
+   "id": "m5stack-atom",
+   "name": "M5Stack-ATOM",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "M5Stack",
+   "url": "http://www.m5stack.com"
+  },
+  {
+   "id": "m5stack-atoms3",
+   "name": "M5Stack AtomS3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "M5Stack",
+   "url": "https://docs.m5stack.com/en/core/AtomS3"
+  },
+  {
+   "id": "m5stack-core-esp32",
+   "name": "M5Stack Core ESP32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "M5Stack",
+   "url": "http://www.m5stack.com"
+  },
+  {
+   "id": "m5stack-core-esp32-16M",
+   "name": "M5Stack Core ESP32 16M",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 532480,
+   "vendor": "M5Stack",
+   "url": "http://www.m5stack.com"
+  },
+  {
+   "id": "m5stack-core2",
+   "name": "M5Stack Core2",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 4521984,
+   "vendor": "M5Stack",
+   "url": "http://www.m5stack.com"
+  },
+  {
+   "id": "m5stack-coreink",
+   "name": "M5Stack-Core Ink",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "M5Stack",
+   "url": "http://www.m5stack.com"
+  },
+  {
+   "id": "m5stack-cores3",
+   "name": "M5Stack CoreS3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "M5Stack",
+   "url": "https://docs.m5stack.com/en/core/CoreS3"
+  },
+  {
+   "id": "m5stack-fire",
+   "name": "M5Stack FIRE",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 4521984,
+   "vendor": "M5Stack",
+   "url": "http://www.m5stack.com"
+  },
+  {
+   "id": "m5stack-grey",
+   "name": "M5Stack GREY ESP32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 532480,
+   "vendor": "M5Stack",
+   "url": "http://www.m5stack.com"
+  },
+  {
+   "id": "m5stack-stamps3",
+   "name": "M5Stack StampS3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "M5Stack",
+   "url": "https://docs.m5stack.com/en/core/StampS3"
+  },
+  {
+   "id": "m5stack-station",
+   "name": "M5Stack Station",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 4521984,
+   "vendor": "M5Stack",
+   "url": "http://www.m5stack.com"
+  },
+  {
+   "id": "m5stack-timer-cam",
+   "name": "M5Stack Timer CAM",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "M5Stack",
+   "url": "http://www.m5stack.com"
+  },
+  {
+   "id": "m5stamp-pico",
+   "name": "M5Stamp-Pico",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "M5Stack",
+   "url": "https://shop.m5stack.com/products/m5stamp-pico-mate-with-pin-headers"
+  },
+  {
+   "id": "m5stick-c",
+   "name": "M5Stick-C",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "M5Stack",
+   "url": "http://www.m5stack.com"
+  },
+  {
+   "id": "magicbit",
+   "name": "MagicBit",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Magicblocks.io",
+   "url": "http://magicblocks.io/"
+  },
+  {
+   "id": "mgbot-iotik32a",
+   "name": "MGBOT IOTIK 32A",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "MGBOT",
+   "url": "http://iotik.ru/en/iotik32a/"
+  },
+  {
+   "id": "mgbot-iotik32b",
+   "name": "MGBOT IOTIK 32B",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "MGBOT",
+   "url": "http://iotik.ru/en/iotik32b/"
+  },
+  {
+   "id": "mhetesp32devkit",
+   "name": "MH ET LIVE ESP32DevKIT",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "MH-ET Live",
+   "url": "http://forum.mhetlive.com"
+  },
+  {
+   "id": "mhetesp32minikit",
+   "name": "MH ET LIVE ESP32MiniKit",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "MH-ET Live",
+   "url": "http://forum.mhetlive.com"
+  },
+  {
+   "id": "microduino-core-esp32",
+   "name": "Microduino Core ESP32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Microduino",
+   "url": "https://microduinoinc.com"
+  },
+  {
+   "id": "micros2",
+   "name": "microS2",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "microS2",
+   "url": "https://github.com/MicroDev1/microS2"
+  },
+  {
+   "id": "minimain_esp32s2",
+   "name": "Department of Alchemy MiniMain ESP32-S2",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Department of Alchemy",
+   "url": "https://github.com/DepartmentOfAlchemy/minimain-esp32-s2"
+  },
+  {
+   "id": "motorgo_mini_1",
+   "name": "MotorGo Mini 1 (ESP32-S3)",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "MotorGo",
+   "url": "https://motorgo.net/shop/ols/products/motorgo-mini-v1-dot-2-starter-kit-plus-motors"
+  },
+  {
+   "id": "namino_arancio",
+   "name": "Namino Arancio",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "MECT SRL",
+   "url": "https://namino.cc/boards/namino-arancio"
+  },
+  {
+   "id": "namino_rosso",
+   "name": "Namino Rosso",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "MECT SRL",
+   "url": "https://namino.cc/boards/namino-rosso"
+  },
+  {
+   "id": "nano32",
+   "name": "MakerAsia Nano32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "MakerAsia",
+   "url": "http://iot-bits.com/nano32-esp32-development-board"
+  },
+  {
+   "id": "nebulas3",
+   "name": "Kinetic Dynamics Nebula S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Kinetic Dynamics",
+   "url": "https://kineticdynamics.in/product/nebula-s3/"
+  },
+  {
+   "id": "nina_w10",
+   "name": "u-blox NINA-W10 series",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "2MB",
+   "ram": 327680,
+   "vendor": "u-blox",
+   "url": "https://www.u-blox.com/en/product/nina-w10-series"
+  },
+  {
+   "id": "node32s",
+   "name": "Node32s",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Aiyarafun",
+   "url": "http://www.ayarafun.com"
+  },
+  {
+   "id": "nodemcu-32s",
+   "name": "NodeMCU-32S",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "NodeMCU",
+   "url": "http://www.nodemcu.com/"
+  },
+  {
+   "id": "nodemcu-32s2",
+   "name": "Ai-Thinker NodeMCU-32S2 (ESP-12K)",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Ai-Thinker",
+   "url": "https://docs.ai-thinker.com/en/esp32s2"
+  },
+  {
+   "id": "nscreen-32",
+   "name": "YeaCreate NSCREEN-32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "YeaCreate",
+   "url": "https://yeacreate.com"
+  },
+  {
+   "id": "odroid_esp32",
+   "name": "ODROID-GO",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "Hardkernel",
+   "url": "https://www.hardkernel.com/main/products/prdt_info.php?g_code=G152875062626"
+  },
+  {
+   "id": "onehorse32dev",
+   "name": "Onehorse ESP32 Dev Module",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Onehorse",
+   "url": "https://www.tindie.com/products/onehorse/esp32-development-board/"
+  },
+  {
+   "id": "oroca_edubot",
+   "name": "OROCA EduBot",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "OROCA",
+   "url": "https://github.com/oroca/OROCA-EduBot"
+  },
+  {
+   "id": "pico32",
+   "name": "ESP32 Pico Kit",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Espressif",
+   "url": "http://esp-idf.readthedocs.io/en/latest/get-started/get-started-pico-kit.html"
+  },
+  {
+   "id": "piranha_esp32",
+   "name": "Fishino Piranha ESP-32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Fishino",
+   "url": "http://fishino.it/boards.html"
+  },
+  {
+   "id": "pocket_32",
+   "name": "Dongsen Tech Pocket 32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Dongsen Technology",
+   "url": "http://dong-sen.com"
+  },
+  {
+   "id": "pycom_gpy",
+   "name": "Pycom GPy",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Pycom Ltd.",
+   "url": "https://pycom.io/product/gpy/"
+  },
+  {
+   "id": "qchip",
+   "name": "Qchip",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Qmobot LLP",
+   "url": "http://qmobot.com/"
+  },
+  {
+   "id": "quantum",
+   "name": "Noduino Quantum",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "Noduino",
+   "url": "http://wiki.jackslab.org/Noduino"
+  },
+  {
+   "id": "redpill_esp32s3",
+   "name": "Munich Labs RedPill ESP32-S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Munich Labs",
+   "url": "https://munich-labs.com/index.php/redpill-esp32-s3/"
+  },
+  {
+   "id": "roboheart_hercules",
+   "name": "RoboHeart Hercules",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "RoboHeart",
+   "url": "https://roboheart.de/en_gb/"
+  },
+  {
+   "id": "rymcu-esp32-c3-devkitm-1",
+   "name": "RYMCU ESP32-C3-DevKitM-1",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "RYMCU",
+   "url": "https://rymcu.com/products"
+  },
+  {
+   "id": "rymcu-esp32-devkitc",
+   "name": "RYMCU ESP32-DevKitC",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "RYMCU",
+   "url": "https://rymcu.com/products"
+  },
+  {
+   "id": "rymcu-esp32-s3-devkitc-1",
+   "name": "RYMCU ESP32-S3-DevKitC-1-N8R2 (8 MB QD, 2 MB PSRAM)",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "RYMCU",
+   "url": "https://rymcu.com/products"
+  },
+  {
+   "id": "s_odi_ultra",
+   "name": "S.ODI Ultra v1",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "S.ODI",
+   "url": "https://www.espressif.com/en/products/socs/esp32"
+  },
+  {
+   "id": "seeed_xiao_esp32c3",
+   "name": "Seeed Studio XIAO ESP32C3",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Seeed Studio",
+   "url": "https://wiki.seeedstudio.com/XIAO_ESP32C3_Getting_Started/"
+  },
+  {
+   "id": "seeed_xiao_esp32c6",
+   "name": "Seeed Studio XIAO ESP32C6",
+   "mcu": "esp32c6",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Seeed Studio",
+   "url": "https://wiki.seeedstudio.com/XIAO_ESP32C6_Getting_Started/"
+  },
+  {
+   "id": "seeed_xiao_esp32s3",
+   "name": "Seeed Studio XIAO ESP32S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Seeed Studio",
+   "url": "https://www.seeedstudio.com/XIAO-ESP32S3-p-5627.html"
+  },
+  {
+   "id": "sensebox_mcu_esp32s2",
+   "name": "senseBox MCU-S2 ESP32-S2",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "senseBox",
+   "url": "https://sensebox.de/en/products-home"
+  },
+  {
+   "id": "sensesiot_weizen",
+   "name": "LOGISENSES Senses Weizen",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "LOGISENSES",
+   "url": "https://www.logisenses.com/index.php/product/senses-weizen/"
+  },
+  {
+   "id": "sg-o_airMon",
+   "name": "SG-O AirMon",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "SG-O",
+   "url": "https://github.com/SG-O/airMon"
+  },
+  {
+   "id": "sparkfun_esp32_iot_redboard",
+   "name": "SparkFun ESP32 IoT RedBoard",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "SparkFun",
+   "url": "https://www.sparkfun.com/products/19177"
+  },
+  {
+   "id": "sparkfun_esp32micromod",
+   "name": "SparkFun ESP32 MicroMod",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "SparkFun",
+   "url": "https://www.sparkfun.com/products/16781"
+  },
+  {
+   "id": "sparkfun_esp32s2_thing_plus",
+   "name": "SparkFun ESP32-S2 Thing Plus",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "SparkFun",
+   "url": "https://www.sparkfun.com/products/17743"
+  },
+  {
+   "id": "sparkfun_esp32s2_thing_plus_c",
+   "name": "SparkFun ESP32 Thing Plus C",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "SparkFun",
+   "url": "https://www.sparkfun.com/products/18018"
+  },
+  {
+   "id": "sparkfun_lora_gateway_1-channel",
+   "name": "SparkFun LoRa Gateway 1-Channel",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "SparkFun",
+   "url": "https://www.sparkfun.com/products/15006"
+  },
+  {
+   "id": "tamc_termod_s3",
+   "name": "TAMC Termod S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "TAMC",
+   "url": "https://termod-s3.readthedocs.io/en/latest/"
+  },
+  {
+   "id": "tinypico",
+   "name": "Unexpected Maker TinyPICO",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Unexpected Maker",
+   "url": "https://www.tinypico.com"
+  },
+  {
+   "id": "trueverit-iot-driver",
+   "name": "Trueverit ESP32 Universal IoT Driver",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Trueverit",
+   "url": "https://trueverit.com/"
+  },
+  {
+   "id": "trueverit-iot-driver-mk2",
+   "name": "Trueverit ESP32 Universal IoT Driver MK II",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Trueverit",
+   "url": "https://trueverit.com/"
+  },
+  {
+   "id": "trueverit-iot-driver-mk3",
+   "name": "Trueverit ESP32 Universal IoT Driver MK III",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Trueverit",
+   "url": "https://trueverit.com/"
+  },
+  {
+   "id": "ttgo-lora32-v1",
+   "name": "TTGO LoRa32-OLED V1",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "TTGO",
+   "url": "https://github.com/Xinyuan-LilyGO/TTGO-LoRa-Series"
+  },
+  {
+   "id": "ttgo-lora32-v2",
+   "name": "TTGO LoRa32-OLED V2",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "TTGO",
+   "url": "https://github.com/LilyGO/TTGO-LORA32-V2.0"
+  },
+  {
+   "id": "ttgo-lora32-v21",
+   "name": "TTGO LoRa32-OLED v2.1.6",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "TTGO",
+   "url": "https://github.com/LilyGO/TTGO-LoRa32-V2.1"
+  },
+  {
+   "id": "ttgo-t-beam",
+   "name": "TTGO T-Beam",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 1310720,
+   "vendor": "TTGO",
+   "url": "https://github.com/LilyGO/TTGO-T-Beam"
+  },
+  {
+   "id": "ttgo-t-oi-plus",
+   "name": "TTGO T-OI PLUS RISC-V ESP32-C3",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "TTGO",
+   "url": "http://www.lilygo.cn/prod_view.aspx?TypeId=50044&Id=1361&FId=t3:50044:3"
+  },
+  {
+   "id": "ttgo-t-watch",
+   "name": "TTGO T-Watch",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "TTGO",
+   "url": "https://github.com/Xinyuan-LilyGO/TTGO-T-Watch"
+  },
+  {
+   "id": "ttgo-t1",
+   "name": "TTGO T1",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "TTGO",
+   "url": "https://github.com/LilyGO/ESP32-TTGO-T1"
+  },
+  {
+   "id": "ttgo-t7-v13-mini32",
+   "name": "TTGO T7 V1.3 Mini32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 1310720,
+   "vendor": "TTGO",
+   "url": "https://github.com/LilyGO/ESP32-MINI-32-V1.3"
+  },
+  {
+   "id": "ttgo-t7-v14-mini32",
+   "name": "TTGO T7 V1.4 Mini32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 1310720,
+   "vendor": "TTGO",
+   "url": "http://www.lilygo.cn/prod_view.aspx?TypeId=50033&Id=978&FId=t3:50033:3"
+  },
+  {
+   "id": "turta_iot_node",
+   "name": "Turta IoT Node",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Turta",
+   "url": "https://www.turta.io/en/iotnode"
+  },
+  {
+   "id": "um_feathers2",
+   "name": "Unexpected Maker FeatherS2",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "Unexpected Maker",
+   "url": "https://feathers2.io"
+  },
+  {
+   "id": "um_feathers2_neo",
+   "name": "Unexpected Maker FeatherS2 Neo",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Unexpected Maker",
+   "url": "https://unexpectedmaker.com/feathers2-neo"
+  },
+  {
+   "id": "um_feathers3",
+   "name": "Unexpected Maker FeatherS3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "Unexpected Maker",
+   "url": "https://unexpectedmaker.com/shop/feathers3"
+  },
+  {
+   "id": "um_nanos3",
+   "name": "Unexpected Maker NanoS3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Unexpected Maker",
+   "url": "https://unexpectedmaker.com/shop/nanoS3"
+  },
+  {
+   "id": "um_pros3",
+   "name": "Unexpected Maker PROS3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "Unexpected Maker",
+   "url": "https://unexpectedmaker.com/shop/pros3"
+  },
+  {
+   "id": "um_rmp",
+   "name": "Unexpected Maker RMP",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Unexpected Maker",
+   "url": "https://unexpectedmaker.com/esp32s2"
+  },
+  {
+   "id": "um_tinys2",
+   "name": "Unexpected Maker TinyS2",
+   "mcu": "esp32s2",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Unexpected Maker",
+   "url": "https://tinys2.io"
+  },
+  {
+   "id": "um_tinys3",
+   "name": "Unexpected Maker TinyS3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Unexpected Maker",
+   "url": "https://unexpectedmaker.com/shop/ttinys3-esp32s3"
+  },
+  {
+   "id": "unphone7",
+   "name": "unPhone 7",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "University of Sheffield",
+   "url": "https://unphone.net/"
+  },
+  {
+   "id": "unphone8",
+   "name": "unPhone 8",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 2424832,
+   "vendor": "University of Sheffield",
+   "url": "https://unphone.net/"
+  },
+  {
+   "id": "unphone9",
+   "name": "unPhone 9",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 8716288,
+   "vendor": "University of Sheffield",
+   "url": "https://unphone.net/"
+  },
+  {
+   "id": "upesy_wroom",
+   "name": "uPesy ESP32 Wroom DevKit",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "uPesy",
+   "url": "https://www.upesy.fr/products/upesy-esp32-wroom-devkit-board"
+  },
+  {
+   "id": "upesy_wrover",
+   "name": "uPesy ESP32 Wrover DevKit",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "uPesy",
+   "url": "https://www.upesy.fr/products/upesy-esp32-wrover-devkit-board"
+  },
+  {
+   "id": "valtrack_v4_mfw_esp32_c3",
+   "name": "Valetron Systems VALTRACK-V4MVF",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Valetron Systems",
+   "url": "https://www.valetron.com/"
+  },
+  {
+   "id": "valtrack_v4_vts_esp32_c3",
+   "name": "Valetron Systems VALTRACK-V4VTS",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Valetron Systems",
+   "url": "https://www.valetron.com/"
+  },
+  {
+   "id": "vintlabs-devkit-v1",
+   "name": "VintLabs ESP32 Devkit",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "VintLabs",
+   "url": "https://www.vintlabs.com/product/vintlabs-esp32-wroom32-iot-8x2a-pwm-driver-development-kit-4mb-flash-wifi-bluetooth/"
+  },
+  {
+   "id": "watchy",
+   "name": "SQFMI Watchy v2.0",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "SQFMI",
+   "url": "https://watchy.sqfmi.com/"
+  },
+  {
+   "id": "weactstudio_esp32c3coreboard",
+   "name": "WeAct Studio ESP32C3CoreBoard",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 409600,
+   "vendor": "WeAct Studio",
+   "url": "https://github.com/WeActStudio/WeActStudio.ESP32C3CoreBoard"
+  },
+  {
+   "id": "wemos_d1_mini32",
+   "name": "WEMOS D1 MINI ESP32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "WEMOS",
+   "url": "https://www.wemos.cc"
+  },
+  {
+   "id": "wemos_d1_uno32",
+   "name": "WEMOS D1 R32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "WEMOS",
+   "url": "https://www.wemos.cc"
+  },
+  {
+   "id": "wemosbat",
+   "name": "WeMos WiFi and Bluetooth Battery",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "WEMOS",
+   "url": "https://www.wemos.cc"
+  },
+  {
+   "id": "wesp32",
+   "name": "Silicognition wESP32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Silicognition",
+   "url": "https://wesp32.com/"
+  },
+  {
+   "id": "widora-air",
+   "name": "Widora AIR",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "16MB",
+   "ram": 327680,
+   "vendor": "Widora",
+   "url": "http://widora.io"
+  },
+  {
+   "id": "wifiduino32",
+   "name": "Blinker WiFiduino32",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Blinker",
+   "url": "https://diandeng.tech"
+  },
+  {
+   "id": "wifiduino32c3",
+   "name": "Blinker WiFiduinoV2 (ESP32-C3)",
+   "mcu": "esp32c3",
+   "f_cpu": 160000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Blinker",
+   "url": "https://diandeng.tech"
+  },
+  {
+   "id": "wifiduino32s3",
+   "name": "Blinker WiFiduino32S3",
+   "mcu": "esp32s3",
+   "f_cpu": 240000000,
+   "flash_size": "8MB",
+   "ram": 327680,
+   "vendor": "Blinker",
+   "url": "https://diandeng.tech"
+  },
+  {
+   "id": "wipy3",
+   "name": "Pycom WiPy3",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 1310720,
+   "vendor": "Pycom Ltd.",
+   "url": "https://pycom.io/"
+  },
+  {
+   "id": "wt32-eth01",
+   "name": "Wireless-Tag WT32-ETH01 Ethernet Module",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "Wireless-Tag",
+   "url": "http://www.wireless-tag.com/portfolio/wt32-eth01/"
+  },
+  {
+   "id": "xinabox_cw02",
+   "name": "XinaBox CW02",
+   "mcu": "esp32",
+   "f_cpu": 240000000,
+   "flash_size": "4MB",
+   "ram": 327680,
+   "vendor": "XinaBox",
+   "url": "https://xinabox.cc/products/cw02"
+  }
+ ]
+}

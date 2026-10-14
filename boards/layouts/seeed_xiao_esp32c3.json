@@ -1,0 +1,137 @@
+{
+ "board": "seeed_xiao_esp32c3",
+ "name": "Seeed Studio XIAO ESP32C3",
+ "image": "images/seeed_xiao_esp32c3.svg",
+ "width": 285,
+ "height": 356,
+ "credit": "Illustration drawn for esp32sim (not to exact scale); see the official photo and pinout on the Seeed wiki",
+ "wiki": "https://wiki.seeedstudio.com/XIAO_ESP32C3_Getting_Started/",
+ "photo": "https://files.seeedstudio.com/wiki/XIAO_WiFi/board-pic.png",
+ "pinout": "https://files.seeedstudio.com/wiki/XIAO_WiFi/XIAO_ESP32-C3_front_pinout.png",
+ "pins": [
+  {
+   "label": "D0",
+   "x": 12,
+   "y": 92.0,
+   "side": "left",
+   "gpio": 2,
+   "alt": "A0"
+  },
+  {
+   "label": "D1",
+   "x": 12,
+   "y": 132.6,
+   "side": "left",
+   "gpio": 3,
+   "alt": "A1"
+  },
+  {
+   "label": "D2",
+   "x": 12,
+   "y": 173.3,
+   "side": "left",
+   "gpio": 4,
+   "alt": "A2"
+  },
+  {
+   "label": "D3",
+   "x": 12,
+   "y": 213.9,
+   "side": "left",
+   "gpio": 5,
+   "alt": "A3"
+  },
+  {
+   "label": "D4",
+   "x": 12,
+   "y": 254.6,
+   "side": "left",
+   "gpio": 6,
+   "alt": "SDA"
+  },
+  {
+   "label": "D5",
+   "x": 12,
+   "y": 295.2,
+   "side": "left",
+   "gpio": 7,
+   "alt": "SCL"
+  },
+  {
+   "label": "D6",
+   "x": 12,
+   "y": 335.8,
+   "side": "left",
+   "gpio": 21,
+   "alt": "TX"
+  },
+  {
+   "label": "5V",
+   "x": 273,
+   "y": 92.0,
+   "side": "right"
+  },
+  {
+   "label": "GND",
+   "x": 273,
+   "y": 132.6,
+   "side": "right"
+  },
+  {
+   "label": "3V3",
+   "x": 273,
+   "y": 173.3,
+   "side": "right"
+  },
+  {
+   "label": "D10",
+   "x": 273,
+   "y": 213.9,
+   "side": "right",
+   "gpio": 10,
+   "alt": "MOSI"
+  },
+  {
+   "label": "D9",
+   "x": 273,
+   "y": 254.6,
+   "side": "right",
+   "gpio": 9,
+   "alt": "MISO/BOOT"
+  },
+  {
+   "label": "D8",
+   "x": 273,
+   "y": 295.2,
+   "side": "right",
+   "gpio": 8,
+   "alt": "SCK"
+  },
+  {
+   "label": "D7",
+   "x": 273,
+   "y": 335.8,
+   "side": "right",
+   "gpio": 20,
+   "alt": "RX"
+  }
+ ],
+ "parts": [
+  {
+   "type": "button",
+   "role": "reset",
+   "label": "RST",
+   "x": 38,
+   "y": 55,
+   "r": 16
+  },
+  {
+   "type": "button",
+   "role": "boot",
+   "label": "BOOT",
+   "x": 247,
+   "y": 55,
+   "r": 16
+  }
+ ]
+}

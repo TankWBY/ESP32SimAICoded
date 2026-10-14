@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>esp32sim</title>
+<style>
+:root {
+  --bg: #f4f5f7; --panel: #ffffff; --text: #1d2330; --muted: #667085; --line: #e3e6eb;
+  --accent: #0e7490; --accent-soft: #e0f2f7;
+  --high: #f2611d; --low: #3d5a80; --float: #a0a7b4; --ext: #0ea5a4; --warn: #b45309; --bad: #c2410c;
+  --console-bg: #11151c; --console-text: #d7dde8;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1218; --panel: #171b23; --text: #e6e9ef; --muted: #8b94a5; --line: #262c37;
+    --accent: #38bdf8; --accent-soft: #10303f;
+    --high: #ff7a3d; --low: #6d8fbf; --float: #5d6574; --ext: #2dd4bf; --warn: #f59e0b; --bad: #fb923c;
+    --console-bg: #0a0d12;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 10px 16px;
+         background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; }
+.brand { font-weight: 700; font-size: 16px; letter-spacing: .2px; margin-right: 6px; }
+.brand span { color: var(--muted); font-weight: 400; }
+label.pick { display: flex; align-items: center; gap: 6px; color: var(--muted); font-size: 13px; }
+select, input[type=text] { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line);
+         border-radius: 7px; padding: 5px 8px; }
+select { max-width: 320px; }
+button { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: 7px;
+         padding: 5px 11px; cursor: pointer; user-select: none; }
+button:hover { border-color: var(--accent); }
+button.active, button:active { background: var(--accent-soft); border-color: var(--accent); }
+.spacer { flex: 1; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 99px; font-size: 13px;
+        background: var(--bg); border: 1px solid var(--line); white-space: nowrap; max-width: 420px; overflow: hidden; text-overflow: ellipsis; }
+.pill::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--float); flex: none; }
+.pill.running::before { background: #22c55e; }
+.pill.download::before { background: var(--accent); }
+.pill.held::before, .pill.halted::before { background: var(--bad); }
+main { display: grid; grid-template-columns: minmax(320px, 1fr) minmax(420px, 1.15fr); gap: 16px; padding: 16px; max-width: 1500px; margin: 0 auto; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; min-width: 0; }
+.card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+#boardwrap { position: relative; }
+#board { width: 100%; height: auto; max-height: 72vh; display: block; touch-action: none; }
+#board text { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.pin-dot { cursor: pointer; }
+.pin-dot:hover { filter: brightness(1.25); }
+.part-btn { cursor: pointer; fill: transparent; stroke: transparent; stroke-width: 3; }
+.part-btn:hover, .part-btn.pressed { stroke: var(--accent); fill: rgba(56,189,248,.18); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; color: var(--muted); font-size: 12px; margin-top: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+.meta { margin-top: 10px; font-size: 12px; color: var(--muted); display: grid; gap: 3px; }
+.meta a { color: var(--accent); }
+.meta code { color: var(--text); }
+#photo { margin-top: 10px; display: none; }
+#photo img { max-width: 100%; max-height: 220px; border-radius: 8px; border: 1px solid var(--line); background: #fff; }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; color: var(--muted); font-weight: 600; font-size: 12px; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+td { padding: 5px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+tr.sel td { background: var(--accent-soft); }
+td.name { white-space: nowrap; }
+td.name b { font-weight: 600; }
+td.name small { color: var(--muted); margin-left: 4px; }
+.badge { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 5px; margin: 1px 3px 1px 0;
+         background: var(--bg); border: 1px solid var(--line); white-space: nowrap; }
+.badge.out { border-color: var(--high); color: var(--high); }
+.badge.in { border-color: var(--low); color: var(--low); }
+.badge.fn { border-color: var(--accent); color: var(--accent); }
+.badge.off { color: var(--muted); }
+.badge.warn { border-color: var(--warn); color: var(--warn); }
+.lvl { display: inline-flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lvl i { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--float); }
+.lvl.h i { background: var(--high); border-color: var(--high); }
+.lvl.l i { background: var(--low); border-color: var(--low); }
+.lvl.f i { border-style: dashed; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; padding: 3px 9px; background: transparent; min-width: 30px; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+#consolecard { grid-column: 1 / -1; }
+#console { background: var(--console-bg); color: var(--console-text); font: 12.5px/1.45 ui-monospace, "Cascadia Mono", Consolas, monospace;
+           height: 300px; overflow: auto; padding: 10px 12px; border-radius: 8px; margin: 0; white-space: pre-wrap; word-break: break-all; }
+.ansi-31 { color: #f87171; } .ansi-32 { color: #4ade80; } .ansi-33 { color: #facc15; } .ansi-34 { color: #60a5fa; }
+.ansi-35 { color: #e879f9; } .ansi-36 { color: #22d3ee; } .ansi-1 { font-weight: 700; }
+.consolebar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; align-items: center; }
+.consolebar input[type=text] { flex: 1; min-width: 180px; font-family: ui-monospace, Consolas, monospace; }
+.hint { color: var(--muted); font-size: 12px; }
+#popover { position: absolute; z-index: 4; background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+           box-shadow: 0 8px 28px rgba(0,0,0,.18); padding: 10px 12px; width: 250px; display: none; }
+#popover h3 { margin: 0 0 4px; font-size: 14px; }
+#popover p { margin: 0 0 8px; color: var(--muted); font-size: 12.5px; }
+#popover .row { display: flex; gap: 6px; }
+#popover .row button { flex: 1; }
+#banner { display: none; background: #fff3e0; color: #8a3b00; border-bottom: 1px solid #f5c58a; padding: 6px 16px; font-size: 13px; }
+@media (prefers-color-scheme: dark) { #banner { background: #3a2410; color: #fcd9b0; border-color: #6b3d12; } }
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; padding: 10px; }
+  #consolecard { grid-column: auto; }
+  header { padding: 8px 10px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">esp32sim <span>board view</span></div>
+  <label class="pick">Family <select id="family"></select></label>
+  <label class="pick">Board <select id="boardsel"></select></label>
+  <span id="status" class="pill">connecting…</span>
+  <div class="spacer"></div>
+  <button id="btn-boot" title="Hold to pull GPIO9 low. Hold BOOT, press and release RESET: the chip starts in download mode.">BOOT</button>
+  <button id="btn-reset" title="EN: the chip is held in reset while pressed and boots on release">RESET</button>
+</header>
+<div id="banner"></div>
+<main>
+  <section class="card">
+    <h2 id="boardtitle">Board</h2>
+    <div id="boardwrap">
+      <svg id="board" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div id="popover"></div>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--high)"></i>high</span>
+      <span><i style="background:var(--low)"></i>low</span>
+      <span><i style="border:2px dashed var(--float)"></i>floating</span>
+      <span><i style="border:3px solid var(--ext)"></i>driven by you</span>
+      <span>Click a pin to set it high or low.</span>
+    </div>
+    <div class="meta" id="meta"></div>
+    <div id="photo"><div class="hint">Official board photo (Seeed Studio wiki):</div><a target="_blank" rel="noopener"><img alt="Official board photo"></a></div>
+  </section>
+  <section class="card">
+    <h2>Pins</h2>
+    <div class="tablewrap"><table>
+      <thead><tr><th>Pin</th><th>Configured as</th><th>Level</th><th>Drive from outside</th></tr></thead>
+      <tbody id="pins"></tbody>
+    </table></div>
+  </section>
+  <section class="card" id="consolecard">
+    <h2>Serial console (UART0)</h2>
+    <pre id="console"></pre>
+    <div class="consolebar">
+      <input type="text" id="sendtext" placeholder="Type and press Enter to send to the chip">
+      <select id="eol" title="Line ending"><option value="\n">LF</option><option value="\r">CR</option><option value="\r\n">CR LF</option><option value="">none</option></select>
+      <button id="send">Send</button>
+      <button id="clear">Clear</button>
+      <span class="hint" id="endpoints"></span>
+    </div>
+  </section>
+</main>
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+const SVGNS = "http://www.w3.org/2000/svg";
+let catalog = { families: [], boards: [] };
+let state = null, layout = null, layoutFor = null, selectedPin = null, pendingBoard = null;
+
+function post(path, body) {
+  return fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+}
+function el(tag, attrs, parent, ns) {
+  const e = ns ? document.createElementNS(SVGNS, tag) : document.createElement(tag);
+  for (const k in attrs || {}) {
+    if (k === "text") e.textContent = attrs[k];
+    else e.setAttribute(k, attrs[k]);
+  }
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const sv = (tag, attrs, parent) => el(tag, attrs, parent, true);
+
+// ---- pickers --------------------------------------------------------------
+function fillFamilies() {
+  const f = $("family");
+  f.innerHTML = "";
+  for (const fam of catalog.families) {
+    const n = catalog.boards.filter(b => b.mcu === fam.mcu).length;
+    const o = el("option", { value: fam.mcu, text: fam.name + (fam.supported ? "" : " (not emulated yet)") + (n ? "" : " (no boards)") }, f);
+    if (!fam.supported) o.disabled = true;
+    o.title = fam.core + ": " + fam.note;
+  }
+}
+function fillBoards(mcu, current) {
+  const s = $("boardsel");
+  s.innerHTML = "";
+  const boards = catalog.boards.filter(b => b.mcu === mcu).sort((a, b) => a.name.localeCompare(b.name));
+  const groups = [["With board picture", boards.filter(b => b.layout)], ["Generic pin view", boards.filter(b => !b.layout)]];
+  for (const [label, list] of groups) {
+    if (!list.length) continue;
+    const g = el("optgroup", { label }, s);
+    for (const b of list) el("option", { value: b.id, text: b.name }, g);
+  }
+  if (current) s.value = current;
+}
+$("family").addEventListener("change", () => {
+  const mcu = $("family").value;
+  fillBoards(mcu, null);
+  const first = catalog.boards.find(b => b.mcu === mcu && b.layout) || catalog.boards.find(b => b.mcu === mcu);
+  if (first) switchBoard(first.id);
+});
+$("boardsel").addEventListener("change", () => switchBoard($("boardsel").value));
+function switchBoard(id) {
+  if (state && id === state.board) return;
+  pendingBoard = id;
+  $("boardsel").value = id;
+  setStatus("switching board…", "");
+  post("/api/board", { board: id });
+}
+
+// ---- pin helpers ----------------------------------------------------------
+const pinByGpio = (g) => state && state.pins.find(p => p.gpio === g);
+function levelClass(p) { return p.lvl === 1 ? "h" : p.lvl === 0 ? "l" : "f"; }
+function levelText(p) { return p.lvl === 1 ? "high" : p.lvl === 0 ? "low" : "floating"; }
+function isPeripheral(p) { return !p.fn.startsWith("GPIO"); }
+function dirText(p) {
+  if (p.fn === "GPIO (disabled)") return "not configured";
+  if (p.out && p.in) return "input + output";
+  if (p.out) return p.od ? "open-drain output" : "output";
+  if (p.in) return "input";
+  return "off";
+}
+function shortMode(p) {
+  if (p.fn === "GPIO (disabled)") return "–";
+  if (isPeripheral(p)) return p.fn;
+  let s = p.out ? (p.in ? "IN/OUT" : "OUT") : p.in ? "IN" : "OFF";
+  if (p.pu) s += " ↑"; else if (p.pd) s += " ↓";
+  return s;
+}
+function describe(p) {
+  let s = isPeripheral(p) ? "Used by " + p.fn + " (" + dirText(p) + ")" : "GPIO " + dirText(p);
+  if (p.pu) s += ", pull-up"; if (p.pd) s += ", pull-down"; if (p.od && !p.out) s += ", open drain";
+  if (p.irq) s += ", interrupt on " + p.irq;
+  s += ". ";
+  if (p.drv >= 0) s += "The code drives it " + (p.drv ? "high" : "low") + ". ";
+  if (p.ext >= 0) s += "You drive it " + (p.ext ? "high" : "low") + ". ";
+  if (p.drv >= 0 && p.ext >= 0 && p.drv !== p.ext) s += "Conflict: the chip's output wins. ";
+  s += "Pad level: " + levelText(p) + ".";
+  return s;
+}
+function setPin(gpio, level) { post("/api/pin", { gpio, level }); }
+
+// ---- board drawing --------------------------------------------------------
+function genericLayout() {
+  const gpios = state ? state.pins.map(p => p.gpio) : [];
+  const half = Math.ceil(gpios.length / 2), pitch = 34, w = 240, h = 90 + half * pitch;
+  const pins = gpios.map((g, i) => {
+    const left = i < half, row = left ? i : i - half;
+    return { label: "GPIO" + g, gpio: g, x: left ? 14 : w - 14, y: 70 + row * pitch, side: left ? "left" : "right" };
+  });
+  return { generic: true, width: w, height: h, pins, parts: [] };
+}
+function drawBoard() {
+  const svg = $("board");
+  svg.innerHTML = "";
+  if (!layout) return;
+  const L = layout, margin = 132;
+  svg.setAttribute("viewBox", `${-margin} -6 ${L.width + 2 * margin} ${L.height + 12}`);
+  if (L.generic) {
+    sv("rect", { x: 0, y: 0, width: L.width, height: L.height, rx: 14, fill: "#1f6f50", stroke: "#0d3b2a" }, svg);
+    sv("rect", { x: L.width / 2 - 52, y: L.height / 2 - 52, width: 104, height: 104, rx: 6, fill: "#2b2f36" }, svg);
+    sv("text", { x: L.width / 2, y: L.height / 2 + 5, "text-anchor": "middle", fill: "#d5d9e0", "font-size": 14, text: state ? state.chip : "" }, svg);
+    sv("text", { x: L.width / 2, y: 30, "text-anchor": "middle", fill: "#cfe8dc", "font-size": 12, text: "no picture for this board" }, svg);
+  } else {
+    sv("image", { href: L.image, x: 0, y: 0, width: L.width, height: L.height }, svg);
+  }
+  for (const part of L.parts || []) {
+    if (part.type === "button") {
+      const c = sv("circle", { cx: part.x, cy: part.y, r: part.r || 16, class: "part-btn", "data-role": part.role }, svg);
+      sv("title", { text: part.role === "boot" ? "BOOT button (GPIO9): hold it" : "RESET button (EN)" }, c);
+      bindHold(c, part.role);
+    } else if (part.type === "rgbled") {
+      const c = sv("circle", { cx: part.x, cy: part.y, r: 9, fill: "none", stroke: "var(--float)", "stroke-dasharray": "3 2", "data-led": part.gpio }, svg);
+      sv("title", { text: part.label + " on GPIO" + part.gpio + ": its colour needs the RMT peripheral, which is not emulated yet" }, c);
+    }
+  }
+  for (const pin of L.pins) {
+    const left = pin.side === "left", tx = left ? -14 : L.width + 14, anchor = left ? "end" : "start";
+    const g = sv("g", { "data-gpio": pin.gpio === undefined ? "" : pin.gpio }, svg);
+    if (pin.gpio === undefined) {
+      sv("rect", { x: pin.x - 5, y: pin.y - 5, width: 10, height: 10, rx: 2, fill: "var(--float)", opacity: .55 }, g);
+      sv("text", { x: tx, y: pin.y + 4, "text-anchor": anchor, "font-size": 12, fill: "var(--muted)", text: pin.label }, g);
+      continue;
+    }
+    const isGpioLabel = pin.label === "GPIO" + pin.gpio;
+    sv("line", { x1: pin.x, y1: pin.y, x2: left ? -8 : L.width + 8, y2: pin.y, stroke: "var(--line)", "stroke-width": 1.5 }, g);
+    const ring = sv("circle", { cx: pin.x, cy: pin.y, r: 11, fill: "none", stroke: "var(--ext)", "stroke-width": 3, class: "ring", visibility: "hidden" }, g);
+    const dot = sv("circle", { cx: pin.x, cy: pin.y, r: 8, class: "pin-dot", "stroke-width": 2 }, g);
+    const title = sv("title", {}, dot);
+    const name = isGpioLabel ? pin.label : pin.label + " · GPIO" + pin.gpio;
+    sv("text", { x: tx, y: pin.y - 1, "text-anchor": anchor, "font-size": 12.5, "font-weight": 600, fill: "var(--text)", text: name }, g);
+    const mode = sv("text", { x: tx, y: pin.y + 12, "text-anchor": anchor, "font-size": 10.5, fill: "var(--muted)", class: "mode" }, g);
+    dot.addEventListener("click", (ev) => { ev.stopPropagation(); openPopover(pin, dot); });
+    g._refs = { dot, ring, title, mode, pin };
+  }
+  updateBoard();
+}
+function updateBoard() {
+  if (!state) return;
+  for (const g of $("board").querySelectorAll("g[data-gpio]")) {
+    const r = g._refs;
+    if (!r) continue;
+    const p = pinByGpio(r.pin.gpio);
+    if (!p) { r.dot.setAttribute("fill", "none"); r.mode.textContent = "not on this chip"; continue; }
+    const c = levelClass(p);
+    r.dot.setAttribute("fill", c === "h" ? "var(--high)" : c === "l" ? "var(--low)" : "var(--panel)");
+    r.dot.setAttribute("stroke", c === "h" ? "var(--high)" : c === "l" ? "var(--low)" : "var(--float)");
+    r.dot.setAttribute("stroke-dasharray", c === "f" ? "3 2" : "");
+    r.ring.setAttribute("visibility", p.ext >= 0 ? "visible" : "hidden");
+    const bits = [];
+    if (r.pin.alt && r.pin.alt !== p.fn) bits.push(r.pin.alt);
+    if (p.fn !== "GPIO (disabled)") bits.push(shortMode(p));
+    if (p.irq) bits.push("IRQ");
+    r.mode.textContent = bits.join(" · ");
+    r.title.textContent = (r.pin.label) + ": " + describe(p);
+  }
+  for (const led of $("board").querySelectorAll("[data-led]")) {
+    const p = pinByGpio(+led.getAttribute("data-led"));
+    led.setAttribute("stroke", p && p.out ? "var(--accent)" : "var(--float)");
+  }
+  if (selectedPin !== null) refreshPopover();
+}
+
+// ---- popover --------------------------------------------------------------
+let popPin = null;
+function openPopover(pin, dot) {
+  popPin = pin;
+  selectedPin = pin.gpio;
+  const wrap = $("boardwrap").getBoundingClientRect(), d = dot.getBoundingClientRect();
+  const pop = $("popover");
+  pop.style.display = "block";
+  pop.dataset.sig = "";
+  let x = d.left - wrap.left + (pin.side === "left" ? 18 : -268), y = d.top - wrap.top - 10;
+  x = Math.max(0, Math.min(x, wrap.width - 252));
+  pop.style.left = x + "px";
+  pop.style.top = y + "px";
+  refreshPopover();
+  renderTable();
+}
+function refreshPopover() {
+  const pop = $("popover");
+  if (!popPin || pop.style.display !== "block") return;
+  const p = pinByGpio(popPin.gpio);
+  if (!p) return;
+  const sig = popPin.label + JSON.stringify(p);
+  if (pop.dataset.sig === sig) return;
+  pop.dataset.sig = sig;
+  const title = popPin.label === "GPIO" + p.gpio ? popPin.label : popPin.label + " · GPIO" + p.gpio;
+  pop.innerHTML = "";
+  el("h3", { text: title }, pop);
+  el("p", { text: describe(p) }, pop);
+  const row = el("div", { class: "row" }, pop);
+  for (const [lbl, v] of [["High", 1], ["Low", 0], ["Release", null]]) {
+    const b = el("button", { text: lbl }, row);
+    if ((v === null && p.ext < 0) || p.ext === v) b.classList.add("active");
+    b.addEventListener("click", (ev) => { ev.stopPropagation(); setPin(p.gpio, v); });
+  }
+}
+function closePopover() { $("popover").style.display = "none"; popPin = null; selectedPin = null; renderTable(); }
+document.addEventListener("click", (ev) => { if (!$("popover").contains(ev.target)) closePopover(); });
+document.addEventListener("keydown", (ev) => { if (ev.key === "Escape") closePopover(); });
+
+// ---- pin table ------------------------------------------------------------
+function boardLabel(gpio) {
+  if (!layout || layout.generic) return "";
+  const p = layout.pins.find(q => q.gpio === gpio);
+  if (!p) return "";
+  const parts = [];
+  if (p.label !== "GPIO" + gpio) parts.push(p.label);
+  if (p.alt) parts.push(p.alt);
+  return parts.join(" · ");
+}
+// Rows are rebuilt only when their pin changes, so a click is never lost to
+// a row being replaced under the pointer.
+let rowSigs = new Map();
+function renderTable() {
+  const tb = $("pins");
+  if (!state) { tb.innerHTML = ""; return; }
+  const key = state.board + ":" + state.pins.map(p => p.gpio).join(",") + ":" + (layout ? layout.board || "g" : "");
+  if (tb.dataset.key !== key) { tb.innerHTML = ""; rowSigs = new Map(); tb.dataset.key = key; }
+  state.pins.forEach((p, i) => {
+    const sig = JSON.stringify(p);
+    let tr = tb.children[i];
+    if (!tr || rowSigs.get(p.gpio) !== sig) {
+      const fresh = el("tr", {});
+      if (tr) tb.replaceChild(fresh, tr); else tb.appendChild(fresh);
+      tr = fresh;
+      rowSigs.set(p.gpio, sig);
+      fillRow(tr, p);
+    }
+    tr.className = p.gpio === selectedPin ? "sel" : "";
+  });
+}
+function fillRow(tr, p) {
+    const n = el("td", { class: "name" }, tr);
+    el("b", { text: "GPIO" + p.gpio }, n);
+    const bl = boardLabel(p.gpio);
+    if (bl) el("small", { text: bl }, n);
+    const m = el("td", {}, tr);
+    if (p.fn === "GPIO (disabled)") el("span", { class: "badge off", text: "not configured" }, m);
+    else {
+      if (isPeripheral(p)) el("span", { class: "badge fn", text: p.fn }, m);
+      if (p.out) el("span", { class: "badge out", text: p.od ? "output (open drain)" : "output" }, m);
+      if (p.in) el("span", { class: "badge in", text: "input" }, m);
+      if (!p.out && !p.in) el("span", { class: "badge off", text: "off" }, m);
+    }
+    if (p.pu) el("span", { class: "badge", text: "pull-up" }, m);
+    if (p.pd) el("span", { class: "badge", text: "pull-down" }, m);
+    if (p.irq) el("span", { class: "badge warn", text: "IRQ " + p.irq }, m);
+    const lv = el("td", {}, tr);
+    const span = el("span", { class: "lvl " + levelClass(p) }, lv);
+    el("i", {}, span);
+    let t = levelText(p);
+    if (p.drv >= 0) t += " (code)";
+    else if (p.ext >= 0) t += " (you)";
+    else if (p.lvl >= 0) t += p.pu ? " (pull-up)" : p.pd ? " (pull-down)" : "";
+    span.appendChild(document.createTextNode(t));
+    if (p.drv >= 0 && p.ext >= 0 && p.drv !== p.ext) el("span", { class: "badge warn", text: "conflict", title: "You and the chip drive different levels; the chip wins" }, lv);
+    const d = el("td", {}, tr);
+    const seg = el("span", { class: "seg" }, d);
+    for (const [lbl, v, tip] of [["–", null, "release (not driven from outside)"], ["0", 0, "drive low"], ["1", 1, "drive high"]]) {
+      const b = el("button", { text: lbl, title: tip }, seg);
+      if ((v === null && p.ext < 0) || p.ext === v) b.classList.add("on");
+      b.addEventListener("click", (ev) => { ev.stopPropagation(); setPin(p.gpio, v); });
+    }
+}
+
+// ---- BOOT / RESET (press and hold) ----------------------------------------
+function press(role, down) {
+  if (role === "boot") post("/api/pin", { gpio: 9, level: down ? 0 : null });
+  else post("/api/reset", { hold: down });
+  $("btn-" + role).classList.toggle("active", down);
+  for (const c of $("board").querySelectorAll(`.part-btn[data-role="${role}"]`)) c.classList.toggle("pressed", down);
+}
+function bindHold(node, role) {
+  let down = false;
+  node.addEventListener("pointerdown", (ev) => { ev.preventDefault(); ev.stopPropagation(); down = true; node.setPointerCapture?.(ev.pointerId); press(role, true); });
+  const up = (ev) => { if (!down) return; down = false; ev.stopPropagation(); press(role, false); };
+  node.addEventListener("pointerup", up);
+  node.addEventListener("pointercancel", up);
+  node.addEventListener("click", (ev) => ev.stopPropagation());
+}
+bindHold($("btn-boot"), "boot");
+bindHold($("btn-reset"), "reset");
+
+// ---- serial console -------------------------------------------------------
+const decoder = new TextDecoder("utf-8");
+let ansiClass = "", pendingEsc = "";
+function appendSerial(b64) {
+  const bin = atob(b64), bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  let text = pendingEsc + decoder.decode(bytes, { stream: true });
+  pendingEsc = "";
+  const tail = text.match(/\x1b\[[0-9;]*$/);
+  if (tail) { pendingEsc = tail[0]; text = text.slice(0, -tail[0].length); }
+  const con = $("console");
+  const stick = con.scrollTop + con.clientHeight >= con.scrollHeight - 30;
+  const frag = document.createDocumentFragment();
+  const re = /\x1b\[([0-9;]*)m/g;
+  let last = 0, m;
+  const push = (s) => {
+    s = s.replace(/\r\n/g, "\n").replace(/\r/g, "").replace(/\x1b\[[0-9;]*[A-Za-z]/g, "");
+    if (!s) return;
+    const span = document.createElement("span");
+    if (ansiClass) span.className = ansiClass;
+    span.textContent = s;
+    frag.appendChild(span);
+  };
+  while ((m = re.exec(text))) {
+    push(text.slice(last, m.index));
+    last = re.lastIndex;
+    const codes = m[1].split(";").filter(Boolean);
+    ansiClass = codes.filter(c => c !== "0").map(c => "ansi-" + c).join(" ");
+  }
+  push(text.slice(last));
+  con.appendChild(frag);
+  while (con.childNodes.length > 4000) con.removeChild(con.firstChild);
+  if (stick) con.scrollTop = con.scrollHeight;
+}
+function sendLine() {
+  const eol = $("eol").value.replace("\\r", "\r").replace("\\n", "\n");
+  post("/api/serial", { text: $("sendtext").value + eol });
+  $("sendtext").value = "";
+}
+$("send").addEventListener("click", sendLine);
+$("sendtext").addEventListener("keydown", (ev) => { if (ev.key === "Enter") sendLine(); });
+$("clear").addEventListener("click", () => { $("console").innerHTML = ""; });
+
+// ---- state ----------------------------------------------------------------
+function setStatus(text, cls) { const s = $("status"); s.textContent = text; s.className = "pill " + cls; s.title = text; }
+async function loadLayout(board) {
+  layoutFor = board;
+  const info = catalog.boards.find(b => b.id === board);
+  layout = null;
+  if (info && info.layout) {
+    try { const r = await fetch("layouts/" + board + ".json"); if (r.ok) layout = await r.json(); } catch (e) { /* generic below */ }
+  }
+  if (layoutFor !== board) return;
+  if (!layout) layout = genericLayout();
+  drawBoard();
+  renderMeta();
+  renderTable();
+}
+function renderMeta() {
+  const m = $("meta");
+  m.innerHTML = "";
+  if (!state) return;
+  $("boardtitle").textContent = state.board_name || state.board;
+  const line = (label, value, code) => { const d = el("div", {}, m); d.appendChild(document.createTextNode(label + " ")); el(code ? "code" : "span", { text: value }, d); return d; };
+  line("Chip:", state.chip + " (" + state.mcu + ")");
+  line("Flash file:", state.flash, true);
+  if (layout && layout.credit) {
+    const d = el("div", { text: layout.credit + " " }, m);
+    if (layout.wiki) el("a", { href: layout.wiki, target: "_blank", rel: "noopener", text: "board docs" }, d);
+    if (layout.pinout) { d.appendChild(document.createTextNode(" · ")); el("a", { href: layout.pinout, target: "_blank", rel: "noopener", text: "official pinout" }, d); }
+  } else if (layout && layout.generic) {
+    const info = catalog.boards.find(b => b.id === state.board);
+    const d = el("div", { text: "No board picture yet: showing the chip's usable GPIOs. " }, m);
+    if (info && info.url) el("a", { href: info.url, target: "_blank", rel: "noopener", text: "board vendor page" }, d);
+  }
+  const ph = $("photo");
+  if (layout && layout.photo) {
+    const img = ph.querySelector("img");
+    img.onerror = () => { ph.style.display = "none"; };
+    img.onload = () => { ph.style.display = "block"; };
+    img.src = layout.photo;
+    ph.querySelector("a").href = layout.wiki || layout.photo;
+  } else ph.style.display = "none";
+}
+function onState(s) {
+  const boardChanged = !state || state.board !== s.board;
+  state = s;
+  if (pendingBoard && pendingBoard === s.board) pendingBoard = null;
+  const st = s.status || "";
+  if (s.held) setStatus("held in reset", "held");
+  else if (st.startsWith("halted")) setStatus(st, "halted");
+  else if (st === "download mode") setStatus("download mode: waiting for a flasher", "download");
+  else setStatus(st || "running", st === "running" ? "running" : "");
+  $("banner").style.display = s.error ? "block" : "none";
+  $("banner").textContent = s.error ? "Could not switch board: " + s.error : "";
+  $("endpoints").textContent = s.serial && s.serial.length ? "Also reachable at " + s.serial.join(", ") : "";
+  if (boardChanged) {
+    const info = catalog.boards.find(b => b.id === s.board);
+    const mcu = info ? info.mcu : s.mcu;
+    $("family").value = mcu;
+    fillBoards(mcu, s.board);
+    closePopover();
+    loadLayout(s.board);
+    return;
+  }
+  if (!pendingBoard) $("boardsel").value = s.board;
+  updateBoard();
+  renderTable();
+}
+function connect() {
+  const es = new EventSource("events");
+  es.addEventListener("state", (ev) => onState(JSON.parse(ev.data)));
+  es.addEventListener("serial", (ev) => appendSerial(ev.data));
+  es.onerror = () => setStatus("disconnected: is esp32sim still running?", "halted");
+}
+fetch("api/catalog").then(r => r.json()).then(c => { catalog = c; fillFamilies(); connect(); })
+  .catch(() => setStatus("cannot reach esp32sim", "halted"));
+</script>
+</body>
+</html>
