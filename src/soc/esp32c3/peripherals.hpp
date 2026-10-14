@@ -37,7 +37,8 @@ private:
 
 class Efuse : public RegisterFile {
 public:
-    Efuse(std::string name, const std::array<uint8_t, 6>& mac);
+    // `sys3` is EFUSE_RD_MAC_SPI_SYS_3 (chip revision, package; layout per chip).
+    Efuse(std::string name, const std::array<uint8_t, 6>& mac, uint32_t sys3);
     void write(uint32_t off, uint32_t value) override {}  // read-only model
     void reset() override {}
 };
@@ -96,13 +97,15 @@ public:
     std::function<void(int index, bool level)> on_cpu_intr;
 };
 
-// SYSCON / APB_CTRL. Only the hardware RNG (WDEV_RND at +0xB0) has behaviour.
+// A register block holding the hardware RNG (WDEV_RND): SYSCON/APB_CTRL +0xB0
+// on the C3, LPPERI +0x8 on the C6. Everything else is plain storage.
 class Syscon : public RegisterFile {
 public:
-    explicit Syscon(std::string name) : RegisterFile(std::move(name)) {}
+    Syscon(std::string name, uint32_t rng_offset) : RegisterFile(std::move(name)), rng_off_(rng_offset) {}
     uint32_t read(uint32_t off) override;
 
 private:
+    uint32_t rng_off_;
     uint64_t rng_state_ = 0x9E3779B97F4A7C15ull;
 };
 

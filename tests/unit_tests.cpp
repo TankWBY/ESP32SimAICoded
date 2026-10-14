@@ -161,7 +161,7 @@ static void test_sha() {
 }
 
 static void test_intmatrix() {
-    c3::IntMatrix im("INTMATRIX");
+    c3::IntMatrix im("INTMATRIX", c3::irq::kSources, true);
     uint32_t lines = 0;
     im.on_lines = [&](uint32_t l) { lines = l; };
     im.write(c3::irq::SYSTIMER_TARGET0 * 4, 7);  // source -> CPU line 7

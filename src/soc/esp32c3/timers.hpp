@@ -37,7 +37,7 @@ public:
     void reset() override;
     uint64_t next_event() const override;
     void tick() override;
-    IrqOut irq;
+    IrqOut irq;  // called with the comparator index 0..2
 
 private:
     // 16 MHz counter, derived from master cycles.

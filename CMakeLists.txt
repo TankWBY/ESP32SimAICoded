@@ -31,7 +31,8 @@ add_library(esp32sim_core STATIC
   src/soc/esp32c3/gpio_signals.cpp
   src/soc/esp32c3/intmatrix.cpp
   src/soc/esp32c3/timers.cpp
-  src/soc/esp32c3/rom_hle.cpp
+  src/soc/esp_rom.cpp
+  src/soc/riscv_soc.cpp
   src/soc/spi_flash.cpp
   src/soc/chip.cpp
   src/host/serial_host.cpp

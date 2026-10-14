@@ -129,7 +129,7 @@ void Systimer::tick() {
 void Systimer::update_irq() {
     if (!irq) return;
     uint32_t st = int_raw_ & int_ena_;
-    for (int c = 0; c < 3; ++c) irq(irq::SYSTIMER_TARGET0 + c, (st >> c) & 1);
+    for (int c = 0; c < 3; ++c) irq(c, (st >> c) & 1);  // comparator index; the chip maps it to its source
 }
 
 // ---------------------------------------------------------------- TIMG
