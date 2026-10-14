@@ -1,11 +1,12 @@
 # Mask ROM images
 
-`esp32c3_rev3_rom.elf` is Espressif's ROM ELF for ESP32-C3 revision v0.3 and
-later, from the esp-rom-elfs release 20241011
+`esp32c3_rev3_rom.elf` (ESP32-C3 revision v0.3 and later) and
+`esp32c6_rev0_rom.elf` (every ESP32-C6 revision) are Espressif's ROM ELFs from
+the esp-rom-elfs release 20241011
 (https://github.com/espressif/esp-rom-elfs). Espressif publishes these files
 under the Apache License 2.0 (see `LICENSE` here).
 
-The emulator loads it automatically when it sits next to the executable in
+The emulator loads the right one automatically when it sits next to the executable in
 `roms/` (or pass `--rom FILE`). ESP-IDF and Arduino firmware call into the ROM
 constantly, so they need it; the bundled bare-metal demos do not.
 

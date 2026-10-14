@@ -31,10 +31,12 @@ RiscvSoc::RiscvSoc(const ChipConfig& cfg, uint32_t periph_base, uint32_t periph_
 
     cpu_.on_fatal_trap = [this](Rv32Cpu&, uint32_t cause, uint32_t tval) { on_fatal_trap(cause, tval); };
     cpu_.hook = [this](Rv32Cpu& c) { return on_rom_call(c); };
-    // PMP/PMA, counter-enable and Espressif vendor CSRs (performance
-    // counters, GPIO-on-CSR): plain storage, no behaviour yet.
+    // PMP/PMA, counter-enable, trap delegation and user-mode trap CSRs (the
+    // C6 has U-mode) and Espressif vendor CSRs (performance counters,
+    // GPIO-on-CSR): plain storage, no behaviour yet.
     cpu_.custom_csr = [this](uint32_t csr, uint32_t* v, bool write) {
-        bool known = (csr >= 0x3A0 && csr <= 0x3EF) || csr == 0x306 || csr == 0x320 || (csr >= 0x7C0 && csr <= 0x8FF) ||
+        bool known = (csr >= 0x3A0 && csr <= 0x3EF) || csr == 0x302 || csr == 0x303 || csr == 0x306 || csr == 0x320 ||
+                     csr <= 0x005 || (csr >= 0x040 && csr <= 0x044) || (csr >= 0x7C0 && csr <= 0x8FF) ||
                      (csr >= 0xBC0 && csr <= 0xBFF);
         if (!known) return false;
         if (csr == 0x7E2 || csr == 0x802) {  // MPCCR / UPCCR: performance counter, counts cycles

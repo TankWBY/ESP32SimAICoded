@@ -224,7 +224,7 @@ void Gpio::write(uint32_t off, uint32_t value) {
 
 uint32_t Gpio::IoMux::read(uint32_t off) {
     if (off == 0) return g_.mux_ctrl_;
-    if (off >= 4 && off < 4 + 4 * g_.pins_) return g_.mux_[(off - 4) / 4];
+    if (off >= 4 && off < 4 + 4 * uint32_t(g_.pins_)) return g_.mux_[(off - 4) / 4];
     if (off == 0xFC) return 0x2006050;  // DATE
     return 0;
 }
@@ -234,7 +234,7 @@ void Gpio::IoMux::write(uint32_t off, uint32_t value) {
         g_.mux_ctrl_ = value;
         return;
     }
-    if (off >= 4 && off < 4 + 4 * g_.pins_) {
+    if (off >= 4 && off < 4 + 4 * uint32_t(g_.pins_)) {
         g_.mux_[(off - 4) / 4] = value;
         g_.update();
     }

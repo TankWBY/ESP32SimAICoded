@@ -277,6 +277,11 @@ function drawBoard() {
     } else if (part.type === "rgbled") {
       const c = sv("circle", { cx: part.x, cy: part.y, r: 9, fill: "none", stroke: "var(--float)", "stroke-dasharray": "3 2", "data-led": part.gpio }, svg);
       sv("title", { text: part.label + " on GPIO" + part.gpio + ": its colour needs the RMT peripheral, which is not emulated yet" }, c);
+    } else if (part.type === "led") {
+      // A plain LED driven by a GPIO; "active": 0 for LEDs wired to 3V3 (lit when the pin is low).
+      const c = sv("circle", { cx: part.x, cy: part.y, r: part.r || 6, fill: "none", stroke: "var(--float)", "stroke-width": 2,
+                               "data-plain-led": part.gpio, "data-active": part.active === 0 ? 0 : 1, "data-color": part.color || "#ffb000" }, svg);
+      sv("title", { text: part.label + " (GPIO" + part.gpio + ")" }, c);
     }
   }
   for (const pin of L.pins) {
@@ -322,6 +327,14 @@ function updateBoard() {
   for (const led of $("board").querySelectorAll("[data-led]")) {
     const p = pinByGpio(+led.getAttribute("data-led"));
     led.setAttribute("stroke", p && p.out ? "var(--accent)" : "var(--float)");
+  }
+  for (const led of $("board").querySelectorAll("[data-plain-led]")) {
+    const p = pinByGpio(+led.getAttribute("data-plain-led"));
+    const lit = p && p.out && p.lvl === +led.getAttribute("data-active");
+    const col = led.getAttribute("data-color");
+    led.setAttribute("fill", lit ? col : "none");
+    led.setAttribute("stroke", lit ? col : "var(--float)");
+    led.style.filter = lit ? "drop-shadow(0 0 6px " + col + ")" : "";
   }
   if (selectedPin !== null) refreshPopover();
 }

@@ -1,0 +1,258 @@
+{
+ "board": "esp32-c6-devkitc-1",
+ "name": "ESP32-C6-DevKitC-1",
+ "image": "images/esp32-c6-devkitc-1.png",
+ "width": 257,
+ "height": 600,
+ "credit": "Board drawing: Espressif Systems, esp-dev-kits documentation, CC BY-SA 4.0.",
+ "source": "https://github.com/espressif/esp-dev-kits",
+ "wiki": "https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32c6/esp32-c6-devkitc-1/",
+ "parts": [
+  {
+   "type": "button",
+   "role": "reset",
+   "label": "RESET",
+   "x": 79,
+   "y": 462,
+   "r": 18
+  },
+  {
+   "type": "button",
+   "role": "boot",
+   "label": "BOOT",
+   "x": 180,
+   "y": 462,
+   "r": 18
+  },
+  {
+   "type": "rgbled",
+   "gpio": 8,
+   "label": "RGB LED (WS2812)",
+   "x": 65,
+   "y": 408
+  }
+ ],
+ "pins": [
+  {
+   "label": "3V3",
+   "x": 13.0,
+   "y": 84.1,
+   "side": "left"
+  },
+  {
+   "label": "RST",
+   "x": 13.0,
+   "y": 109.7,
+   "side": "left"
+  },
+  {
+   "label": "GPIO4",
+   "x": 13.0,
+   "y": 135.3,
+   "side": "left",
+   "gpio": 4
+  },
+  {
+   "label": "GPIO5",
+   "x": 13.0,
+   "y": 160.9,
+   "side": "left",
+   "gpio": 5
+  },
+  {
+   "label": "GPIO6",
+   "x": 13.0,
+   "y": 186.5,
+   "side": "left",
+   "gpio": 6
+  },
+  {
+   "label": "GPIO7",
+   "x": 13.0,
+   "y": 212.1,
+   "side": "left",
+   "gpio": 7
+  },
+  {
+   "label": "GPIO0",
+   "x": 13.0,
+   "y": 237.7,
+   "side": "left",
+   "gpio": 0
+  },
+  {
+   "label": "GPIO1",
+   "x": 13.0,
+   "y": 263.3,
+   "side": "left",
+   "gpio": 1
+  },
+  {
+   "label": "GPIO8",
+   "x": 13.0,
+   "y": 288.9,
+   "side": "left",
+   "gpio": 8,
+   "alt": "RGB LED"
+  },
+  {
+   "label": "GPIO10",
+   "x": 13.0,
+   "y": 314.5,
+   "side": "left",
+   "gpio": 10
+  },
+  {
+   "label": "GPIO11",
+   "x": 13.0,
+   "y": 340.1,
+   "side": "left",
+   "gpio": 11
+  },
+  {
+   "label": "GPIO2",
+   "x": 13.0,
+   "y": 365.7,
+   "side": "left",
+   "gpio": 2
+  },
+  {
+   "label": "GPIO3",
+   "x": 13.0,
+   "y": 391.3,
+   "side": "left",
+   "gpio": 3
+  },
+  {
+   "label": "5V",
+   "x": 13.0,
+   "y": 416.9,
+   "side": "left"
+  },
+  {
+   "label": "GND",
+   "x": 13.0,
+   "y": 442.5,
+   "side": "left"
+  },
+  {
+   "label": "NC",
+   "x": 13.0,
+   "y": 468.1,
+   "side": "left"
+  },
+  {
+   "label": "GND",
+   "x": 243.4,
+   "y": 84.1,
+   "side": "right"
+  },
+  {
+   "label": "GPIO16",
+   "x": 243.4,
+   "y": 109.7,
+   "side": "right",
+   "gpio": 16,
+   "alt": "TX"
+  },
+  {
+   "label": "GPIO17",
+   "x": 243.4,
+   "y": 135.3,
+   "side": "right",
+   "gpio": 17,
+   "alt": "RX"
+  },
+  {
+   "label": "GPIO15",
+   "x": 243.4,
+   "y": 160.9,
+   "side": "right",
+   "gpio": 15
+  },
+  {
+   "label": "GPIO23",
+   "x": 243.4,
+   "y": 186.5,
+   "side": "right",
+   "gpio": 23
+  },
+  {
+   "label": "GPIO22",
+   "x": 243.4,
+   "y": 212.1,
+   "side": "right",
+   "gpio": 22
+  },
+  {
+   "label": "GPIO21",
+   "x": 243.4,
+   "y": 237.7,
+   "side": "right",
+   "gpio": 21
+  },
+  {
+   "label": "GPIO20",
+   "x": 243.4,
+   "y": 263.3,
+   "side": "right",
+   "gpio": 20
+  },
+  {
+   "label": "GPIO19",
+   "x": 243.4,
+   "y": 288.9,
+   "side": "right",
+   "gpio": 19
+  },
+  {
+   "label": "GPIO18",
+   "x": 243.4,
+   "y": 314.5,
+   "side": "right",
+   "gpio": 18
+  },
+  {
+   "label": "GPIO9",
+   "x": 243.4,
+   "y": 340.1,
+   "side": "right",
+   "gpio": 9,
+   "alt": "BOOT"
+  },
+  {
+   "label": "GND",
+   "x": 243.4,
+   "y": 365.7,
+   "side": "right"
+  },
+  {
+   "label": "GPIO13",
+   "x": 243.4,
+   "y": 391.3,
+   "side": "right",
+   "gpio": 13,
+   "alt": "USB D+"
+  },
+  {
+   "label": "GPIO12",
+   "x": 243.4,
+   "y": 416.9,
+   "side": "right",
+   "gpio": 12,
+   "alt": "USB D-"
+  },
+  {
+   "label": "GND",
+   "x": 243.4,
+   "y": 442.5,
+   "side": "right"
+  },
+  {
+   "label": "NC",
+   "x": 243.4,
+   "y": 468.1,
+   "side": "right"
+  }
+ ]
+}

@@ -9,12 +9,12 @@ using namespace c3map;
 Esp32c3::Esp32c3(const ChipConfig& cfg)
     : RiscvSoc(cfg, PERIPH_BASE, PERIPH_SIZE),
       sram_(IRAM_SIZE, 0),
-      rtc_fast_(kPageSize, 0),
+      rtc_fast_(kMmuPage, 0),
       rom_image_(ROM_SIZE, 0),
       drom_image_(DROM_MASK_SIZE, 0) {
     map(IRAM_BASE, sram_.data(), IRAM_SIZE, true);
     map(DRAM_BASE, sram_.data() + (SRAM1_IRAM - IRAM_BASE), DRAM_SIZE, true);
-    map(RTC_FAST_BASE, rtc_fast_.data(), kPageSize, true);
+    map(RTC_FAST_BASE, rtc_fast_.data(), kMmuPage, true);
     load_rom(ROM_BASE, rom_image_);
     load_rom(DROM_MASK_BASE, drom_image_);
     map(ROM_BASE, rom_image_.data(), ROM_SIZE, false);
@@ -98,16 +98,16 @@ Esp32c3::~Esp32c3() = default;
 
 void Esp32c3::on_mmu_change(int index, uint32_t value) {
     cpu_.flush_icache();
-    const uint32_t off = uint32_t(index) * kPageSize;
+    const uint32_t off = uint32_t(index) * kMmuPage;
     uint32_t page = value & 0xFF;
-    if ((value & c3::Mmu::kInvalid) || (page + 1) * kPageSize > flash_.size()) {
-        unmap(IROM_BASE + off, kPageSize);
-        unmap(DROM_BASE + off, kPageSize);
+    if ((value & c3::Mmu::kInvalid) || (page + 1) * kMmuPage > flash_.size()) {
+        unmap(IROM_BASE + off, kMmuPage);
+        unmap(DROM_BASE + off, kMmuPage);
         return;
     }
-    uint8_t* host = flash_.data() + page * kPageSize;
-    map(IROM_BASE + off, host, kPageSize, false);
-    map(DROM_BASE + off, host, kPageSize, false);
+    uint8_t* host = flash_.data() + page * kMmuPage;
+    map(IROM_BASE + off, host, kMmuPage, false);
+    map(DROM_BASE + off, host, kMmuPage, false);
 }
 
 void Esp32c3::reset_peripherals(BootMode mode, uint32_t reason) {

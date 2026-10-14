@@ -170,7 +170,7 @@ void EspRom::boot_flash() {
     // ROM "direct boot": flash starts with the magic word twice; the ROM maps
     // flash 1:1 into the cache windows and jumps to IROM + 8.
     if (le32(head) == kDirectBootMagic && le32(head + 4) == kDirectBootMagic) {
-        uint32_t pages = fl.size() / Bus::kPageSize;
+        uint32_t pages = fl.size() / 0x10000u;
         if (pages > p_.mmu_entries) pages = p_.mmu_entries;
         for (uint32_t i = 0; i < pages; ++i) soc_.set_mmu_entry(int(i), i);
         soc_.console_write("SPIWP:0xee\r\nmode:DIO, clock div:1\r\n");

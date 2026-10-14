@@ -65,7 +65,7 @@ void usage() {
         "\n"
         "Board / chip:\n"
         "  --board ID           PlatformIO board id (default esp32-c3-devkitm-1)\n"
-        "  --chip MCU           force a chip variant (esp32c3, ...)\n"
+        "  --chip MCU           force a chip variant (esp32c3, esp32c6, ...)\n"
         "  --list-boards [TXT]  list known boards, optionally filtered\n"
         "  --list-chips         list chip variants and their emulation status\n"
         "  --boards-db FILE     board cache (default: bundled boards/boards.json)\n"
@@ -78,7 +78,7 @@ void usage() {
         "  --mac AA:BB:CC:DD:EE:FF  base MAC address burned into eFuse\n"
         "  --elf FILE           firmware ELF for symbol names in crash reports (repeatable)\n"
         "  --rom FILE           Espressif mask-ROM ELF (tools/fetch_roms.py); needed for ESP-IDF/Arduino apps\n"
-        "                       (default: roms/<chip>_rev3_rom.elf next to the executable, if present)\n"
+        "                       (default: roms/<chip>_revN_rom.elf next to the executable, if present)\n"
         "  --no-rom             ignore any ROM image: built-in ROM emulation only (bare-metal firmware)\n"
         "\n"
         "Serial endpoints (any combination; default --rfc2217 5555):\n"
@@ -388,7 +388,7 @@ int main(int argc, char** argv) {
         cfg.usb_console = opt.usb_console;
         cfg.rom_path = opt.rom;
         if (cfg.rom_path.empty() && !opt.no_rom) {
-            std::string name = cfg.variant + "_rev3_rom.elf";
+            std::string name = cfg.variant + (cfg.variant == "esp32c6" ? "_rev0_rom.elf" : "_rev3_rom.elf");
             for (const fs::path& p :
                  {exe_dir / "roms" / name, exe_dir.parent_path() / "roms" / name, fs::path("roms") / name}) {
                 if (fs::exists(p, ec)) {

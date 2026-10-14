@@ -3,7 +3,7 @@
 only the UI's HTTP API (the same calls the browser makes) to watch pins and
 drive inputs, and check the firmware reacts.
 
-  python3 tests/gpio_ui.py [--emulator build/esp32sim]
+  python3 tests/gpio_ui.py [--emulator build/esp32sim] [--chip esp32c3|esp32c6]
 
 Exits 77 (skipped) when the ROM image or esptool is missing.
 """
@@ -20,10 +20,13 @@ import time
 import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-FW = ROOT / "firmware" / "gpio-demo" / "prebuilt"
-ROM = ROOT / "roms" / "esp32c3_rev3_rom.elf"
-TCP, UI = 5572, 18080
-BASE = f"http://127.0.0.1:{UI}"
+CHIPS = {
+    "esp32c3": dict(fw="prebuilt", rom="esp32c3_rev3_rom.elf", board="esp32-c3-devkitm-1", xiao="seeed_xiao_esp32c3",
+                    tcp=5575, ui=18080),
+    "esp32c6": dict(fw="prebuilt-esp32c6", rom="esp32c6_rev0_rom.elf", board="esp32-c6-devkitc-1",
+                    xiao="seeed_xiao_esp32c6", tcp=5576, ui=18081),
+}
+BASE = ""
 
 
 class Events(threading.Thread):
@@ -70,7 +73,14 @@ def main():
     ap = argparse.ArgumentParser()
     exe = "esp32sim.exe" if os.name == "nt" else "esp32sim"
     ap.add_argument("--emulator", default=str(ROOT / "build" / exe))
+    ap.add_argument("--chip", default="esp32c3", choices=sorted(CHIPS))
     args = ap.parse_args()
+    global BASE
+    c = CHIPS[args.chip]
+    FW = ROOT / "firmware" / "gpio-demo" / c["fw"]
+    ROM = ROOT / "roms" / c["rom"]
+    TCP, UI = c["tcp"], c["ui"]
+    BASE = f"http://127.0.0.1:{UI}"
     if not ROM.exists():
         print(f"skip: {ROM} missing (python3 tools/fetch_roms.py)")
         return 77
@@ -90,7 +100,7 @@ def main():
     with tempfile.TemporaryDirectory() as tmp:
         flash = os.path.join(tmp, "flash.bin")
         emu = subprocess.Popen([args.emulator, "--flash", flash, "--tcp", str(TCP), "--ui", str(UI),
-                                "--boot", "download", "--no-console", "--no-gpio-log", "--rom", str(ROM)],
+                                "--boot", "download", "--no-console", "--no-gpio-log", "--rom", str(ROM), "--board", c["board"]],
                                cwd=tmp, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         try:
             time.sleep(0.5)
@@ -104,8 +114,9 @@ def main():
                 return 1
 
             catalog = json.loads(urllib.request.urlopen(BASE + "/api/catalog", timeout=5).read())
-            xiao = next((b for b in catalog["boards"] if b["id"] == "seeed_xiao_esp32c3"), None)
-            check(xiao is not None and xiao["layout"], "catalog lists the XIAO ESP32C3 with a board layout")
+            for board in (c["board"], c["xiao"]):
+                b = next((b for b in catalog["boards"] if b["id"] == board), None)
+                check(b is not None and b["layout"], f"catalog lists {board} with a board layout")
             page = urllib.request.urlopen(BASE + "/", timeout=5).read()
             check(b"<title>esp32sim</title>" in page, "UI page served")
 
@@ -133,8 +144,8 @@ def main():
             check(ev.wait("dl", lambda: (ev.state or {}).get("status") == "download mode"),
                   "RESET with BOOT held enters download mode")
             post("/api/pin", {"gpio": 9, "level": None})
-            post("/api/board", {"board": "seeed_xiao_esp32c3"})
-            check(ev.wait("board", lambda: (ev.state or {}).get("board") == "seeed_xiao_esp32c3"), "board switch to XIAO")
+            post("/api/board", {"board": c["xiao"]})
+            check(ev.wait("board", lambda: (ev.state or {}).get("board") == c["xiao"]), "board switch to XIAO")
             if failed:
                 print(ev.serial[-2000:])
             return 1 if failed else 0

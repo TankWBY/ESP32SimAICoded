@@ -29,6 +29,7 @@ constexpr uint32_t SYSTEM = 0x600C0000, INTMATRIX = 0x600C2000, IO_MUX = 0x60009
 constexpr uint32_t SYSTIMER = 0x60023000, USB_SERIAL_JTAG = 0x60043000;
 constexpr uint32_t MMU_TABLE = 0x600C5000, EXTMEM = 0x600C4000;
 constexpr uint32_t ROM_STACK_TOP = 0x3FCDE710;
+constexpr uint32_t kMmuPage = 0x10000;  // flash MMU page (64 KiB)
 constexpr uint32_t ROM_VECTOR_TABLE = 0x40001D00;  // _vector_table in esp32c3_rev3_rom.elf
 }  // namespace c3map
 
